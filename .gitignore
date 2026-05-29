@@ -1,0 +1,16 @@
+.DS_Store
+.codex/
+.build/
+dist/
+DerivedData/
+release/
+private/
+*.xcuserdata/
+website/node_modules/
+website/dist/
+website/.next/
+website/.vite/
+website/tsconfig.tsbuildinfo
+website/.vercel/
+website/.env*
+!website/.env.example
