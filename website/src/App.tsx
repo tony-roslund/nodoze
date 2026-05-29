@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { GooglyEyes } from "./components/GooglyEyes";
+import { MenuBarCallout } from "./components/MenuBarCallout";
 import { TopMenuBar } from "./components/TopMenuBar";
 
 export default function App() {
@@ -8,9 +9,10 @@ export default function App() {
     <main className="isolate flex h-dvh overflow-hidden bg-[#f7f7f4] text-zinc-950 antialiased">
       <div className="flex min-h-0 w-full flex-col">
         <TopMenuBar />
+        <MenuBarCallout />
 
         <section className="mx-auto grid min-h-0 w-full max-w-6xl flex-1 grid-cols-1 items-center gap-7 px-5 pb-4 sm:px-8 lg:grid-cols-[10fr_11fr] lg:gap-10 lg:px-10 lg:pb-6">
-          <div className="max-w-2xl">
+          <div className="order-2 max-w-2xl lg:order-1">
             <p className="mt-6 text-base/7 font-medium text-emerald-700 sm:text-sm/6">Mac menu bar utility</p>
             <h1 className="mt-3 text-5xl/14 font-semibold tracking-normal text-zinc-950 sm:text-6xl/17">nodoze</h1>
             <p className="mt-4 max-w-xl text-lg/8 text-zinc-700 sm:text-base/7">
@@ -28,7 +30,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex min-h-64 items-center justify-center lg:min-h-96" aria-label="Interactive nodoze eyes">
+          <div className="order-1 flex min-h-44 items-end justify-center pt-8 lg:order-2 lg:min-h-96 lg:items-center lg:pt-0" aria-label="Interactive nodoze eyes">
             <div className="scale-125 sm:scale-150 lg:scale-[2.15]">
               <GooglyEyes size="lg" />
             </div>
