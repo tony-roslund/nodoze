@@ -1,22 +1,33 @@
-import { ChevronRight } from "lucide-react";
+import { BatteryFull, ChevronRight, Search, Wifi } from "lucide-react";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { GooglyEyes } from "./components/GooglyEyes";
-import { MenuBarDemo } from "./components/MenuBarDemo";
 
 export default function App() {
   return (
     <main className="isolate flex h-dvh overflow-hidden bg-[#f7f7f4] text-zinc-950 antialiased">
-      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-col px-5 sm:px-8 lg:px-10">
-        <header className="flex shrink-0 items-center py-5">
-          <a href="#" className="flex items-center gap-2 text-base/6 font-semibold tracking-normal text-zinc-950 sm:text-sm/6">
-            <GooglyEyes size="sm" />
-            nodoze
-          </a>
+      <div className="flex min-h-0 w-full flex-col">
+        <header className="shrink-0 border-b border-zinc-950/10 bg-zinc-100/85 px-3 py-1.5 shadow-sm shadow-zinc-950/5 backdrop-blur">
+          <div className="flex h-7 items-center justify-between gap-3 text-sm/6 text-zinc-700 sm:text-xs/5">
+            <div className="flex min-w-0 items-center gap-4">
+              <a href="/" aria-label="Homepage" className="flex items-center gap-2 font-semibold text-zinc-950">
+                <GooglyEyes size="sm" />
+                <span>nodoze</span>
+              </a>
+              <span className="hidden text-zinc-500 sm:inline">File</span>
+              <span className="hidden text-zinc-500 sm:inline">Edit</span>
+              <span className="hidden text-zinc-500 md:inline">View</span>
+            </div>
+            <div className="flex shrink-0 items-center gap-3 text-zinc-500">
+              <Search className="hidden size-4 h-lh shrink-0 stroke-current sm:block" aria-hidden="true" />
+              <Wifi className="hidden size-4 h-lh shrink-0 stroke-current sm:block" aria-hidden="true" />
+              <BatteryFull className="hidden size-4 h-lh shrink-0 stroke-current sm:block" aria-hidden="true" />
+              <span>Fri 2:49 PM</span>
+            </div>
+          </div>
         </header>
 
-        <section className="grid min-h-0 flex-1 grid-cols-1 items-center gap-7 pb-4 lg:grid-cols-[10fr_11fr] lg:gap-10 lg:pb-6">
+        <section className="mx-auto grid min-h-0 w-full max-w-6xl flex-1 grid-cols-1 items-center gap-7 px-5 pb-4 sm:px-8 lg:grid-cols-[10fr_11fr] lg:gap-10 lg:px-10 lg:pb-6">
           <div className="max-w-2xl">
-            <GooglyEyes size="lg" />
             <p className="mt-6 text-base/7 font-medium text-emerald-700 sm:text-sm/6">Mac menu bar utility</p>
             <h1 className="mt-3 text-5xl/14 font-semibold tracking-normal text-zinc-950 sm:text-6xl/17">nodoze</h1>
             <p className="mt-4 max-w-xl text-lg/8 text-zinc-700 sm:text-base/7">
@@ -34,12 +45,14 @@ export default function App() {
             </div>
           </div>
 
-          <div aria-label="Interactive nodoze menu bar demo">
-            <MenuBarDemo />
+          <div className="flex min-h-64 items-center justify-center lg:min-h-96" aria-label="Interactive nodoze eyes">
+            <div className="scale-125 sm:scale-150 lg:scale-[2.15]">
+              <GooglyEyes size="lg" />
+            </div>
           </div>
         </section>
 
-        <footer className="flex shrink-0 items-center justify-between gap-4 py-4 text-sm/6 text-zinc-600">
+        <footer className="mx-auto flex w-full max-w-6xl shrink-0 items-center justify-between gap-4 px-5 py-4 text-sm/6 text-zinc-600 sm:px-8 lg:px-10">
           <p className="hidden sm:block">MIT licensed. Built by 74Lab.</p>
           <div className="flex items-center gap-3">
             <a
