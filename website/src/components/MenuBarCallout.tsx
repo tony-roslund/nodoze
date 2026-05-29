@@ -2,7 +2,7 @@ export function MenuBarCallout() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute top-18 right-5 z-40 h-20 w-34 text-emerald-600 sm:top-19 sm:right-24 sm:h-24 sm:w-44 lg:right-36 xl:right-42"
+      className="pointer-events-none absolute top-16 right-5 z-40 h-20 w-34 text-emerald-600 sm:top-17 sm:right-24 sm:h-24 sm:w-44 lg:right-36 xl:right-42"
     >
       <p
         className="translate-y-2 -rotate-8 text-2xl/7 font-semibold tracking-normal sm:text-3xl/8"
