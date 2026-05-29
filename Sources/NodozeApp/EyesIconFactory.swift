@@ -97,10 +97,14 @@ enum EyesIconFactory {
         NSBezierPath(ovalIn: NSRect(x: 12, y: 5.6, width: 4.4, height: 4.4)).fill()
         NSBezierPath(ovalIn: NSRect(x: 21.7, y: 5.6, width: 4.4, height: 4.4)).fill()
 
-        let eyelid = NSColor.controlBackgroundColor.withAlphaComponent(0.98)
+        let eyelid = sleepLidColor()
         eyelid.setFill()
-        NSRect(x: 3.7, y: 9.2, width: 16.2, height: 10).fill()
-        NSRect(x: 18.2, y: 9.2, width: 16.2, height: 10).fill()
+        for eye in [left, right] {
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(ovalIn: eye).addClip()
+            NSRect(x: eye.minX - 1, y: 9.2, width: eye.width + 2, height: 10).fill()
+            NSGraphicsContext.restoreGraphicsState()
+        }
 
         stroke.setStroke()
         let leftLid = NSBezierPath()
@@ -252,6 +256,10 @@ enum EyesIconFactory {
             ]
             strings[index].draw(at: positions[index], withAttributes: attributes)
         }
+    }
+
+    private static func sleepLidColor() -> NSColor {
+        NSColor(red: 0.87, green: 0.83, blue: 0.75, alpha: 0.98)
     }
 
     private static func drawBrows(enabled: Bool) {

@@ -158,7 +158,8 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
   }, [enabled]);
 
   const openness = blinking ? 0.02 : enabled ? 0.98 : 0.14;
-  const lidColor = "#fffdf7";
+  const eyeColor = "#fffdf7";
+  const lidColor = enabled && !blinking ? eyeColor : "#ded5c6";
 
   return (
     <span ref={ref} className={`relative inline-flex ${config.wrap} shrink-0`} aria-hidden="true">
@@ -214,7 +215,7 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
                 cy={eyeY}
                 rx={eyeRx}
                 ry={eyeRy}
-                fill="#fffdf7"
+                fill={eyeColor}
                 stroke="#18181b"
                 strokeOpacity="0.88"
                 strokeWidth={config.stroke}
@@ -222,7 +223,7 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
               <g clipPath={`url(#${clipId}-${cx})`}>
                 <circle cx={pupilX} cy={pupilY} r={config.pupil} fill="#111113" />
                 <circle cx={pupilX - config.glint} cy={pupilY - config.glint} r={config.glint} fill="white" fillOpacity="0.92" />
-                <path d={lowerLidPath(cx)} fill="#fffdf7" />
+                <path d={lowerLidPath(cx)} fill={enabled ? eyeColor : lidColor} />
                 <path d={upperLidPath(cx, openness)} fill={lidColor} />
               </g>
               {!enabled
