@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export COPYFILE_DISABLE=1
+export COPY_EXTENDED_ATTRIBUTES_DISABLE=1
 
 APP_NAME="Nodoze"
 DISPLAY_NAME="nodoze"
@@ -8,6 +10,7 @@ VERSION="0.1.0"
 BUILD_NUMBER="1"
 MIN_SYSTEM_VERSION="14.0"
 SIGNING_IDENTITY="${SIGNING_IDENTITY:-Developer ID Application: Anthony Roslund (9456DA7AJR)}"
+INSTALLER_SIGNING_IDENTITY="${INSTALLER_SIGNING_IDENTITY:-}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-}"
 NOTARY_KEY="${NOTARY_KEY:-}"
 NOTARY_KEY_ID="${NOTARY_KEY_ID:-}"
@@ -21,15 +24,25 @@ APP_MACOS="$APP_CONTENTS/MacOS"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 ZIP_PATH="$RELEASE_DIR/$DISPLAY_NAME-$VERSION.zip"
+HELPER_ID="io.nodoze.helper"
+HELPER_BINARY="$RELEASE_DIR/$HELPER_ID"
+PKG_ROOT="$RELEASE_DIR/pkg-root"
+PKG_SCRIPTS="$RELEASE_DIR/pkg-scripts"
+COMPONENT_PKG="$RELEASE_DIR/$DISPLAY_NAME-component.pkg"
+PKG_PATH="$RELEASE_DIR/$DISPLAY_NAME-$VERSION.pkg"
 
 rm -rf "$RELEASE_DIR"
 mkdir -p "$APP_MACOS"
 
 swift build --package-path "$ROOT_DIR" --configuration release --product "$APP_NAME"
+swift build --package-path "$ROOT_DIR" --configuration release --product NodozeHelper
 BUILD_BINARY="$(swift build --package-path "$ROOT_DIR" --configuration release --product "$APP_NAME" --show-bin-path)/$APP_NAME"
+HELPER_BUILD_BINARY="$(swift build --package-path "$ROOT_DIR" --configuration release --product NodozeHelper --show-bin-path)/NodozeHelper"
 
 cp "$BUILD_BINARY" "$APP_BINARY"
 chmod +x "$APP_BINARY"
+cp "$HELPER_BUILD_BINARY" "$HELPER_BINARY"
+chmod +x "$HELPER_BINARY"
 
 cat >"$INFO_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -67,17 +80,66 @@ PLIST
   --sign "$SIGNING_IDENTITY" \
   "$APP_BUNDLE"
 
+/usr/bin/codesign \
+  --force \
+  --timestamp \
+  --options runtime \
+  --identifier "$HELPER_ID" \
+  --sign "$SIGNING_IDENTITY" \
+  "$HELPER_BINARY"
+
 /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP_BUNDLE"
+/usr/bin/codesign --verify --strict --verbose=2 "$HELPER_BINARY"
 /usr/bin/ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
+
+mkdir -p "$PKG_ROOT/Applications" "$PKG_ROOT/Library/PrivilegedHelperTools" "$PKG_SCRIPTS"
+/usr/bin/ditto --norsrc --noextattr "$APP_BUNDLE" "$PKG_ROOT/Applications/$DISPLAY_NAME.app"
+cp -X "$HELPER_BINARY" "$PKG_ROOT/Library/PrivilegedHelperTools/$HELPER_ID"
+/usr/bin/xattr -cr "$PKG_ROOT"
+find "$PKG_ROOT" -name '._*' -delete
+
+cat >"$PKG_SCRIPTS/postinstall" <<SCRIPT
+#!/bin/sh
+set -e
+/usr/sbin/chown root:wheel /Library/PrivilegedHelperTools/$HELPER_ID
+/bin/chmod 4755 /Library/PrivilegedHelperTools/$HELPER_ID
+exit 0
+SCRIPT
+chmod +x "$PKG_SCRIPTS/postinstall"
+
+pkgbuild \
+  --root "$PKG_ROOT" \
+  --scripts "$PKG_SCRIPTS" \
+  --filter '.*[.][_].*' \
+  --filter '(^|/)\.DS_Store$' \
+  --identifier "$BUNDLE_ID" \
+  --version "$VERSION" \
+  "$COMPONENT_PKG"
+
+if [[ -n "$INSTALLER_SIGNING_IDENTITY" ]]; then
+  productbuild --package "$COMPONENT_PKG" --sign "$INSTALLER_SIGNING_IDENTITY" "$PKG_PATH"
+else
+  productbuild --package "$COMPONENT_PKG" "$PKG_PATH"
+fi
 
 if [[ -n "$NOTARY_PROFILE" ]]; then
   xcrun notarytool submit "$ZIP_PATH" --keychain-profile "$NOTARY_PROFILE" --wait
   xcrun stapler staple "$APP_BUNDLE"
   xcrun stapler validate "$APP_BUNDLE"
+  if [[ -n "$INSTALLER_SIGNING_IDENTITY" ]]; then
+    xcrun notarytool submit "$PKG_PATH" --keychain-profile "$NOTARY_PROFILE" --wait
+    xcrun stapler staple "$PKG_PATH"
+    xcrun stapler validate "$PKG_PATH"
+  fi
 elif [[ -n "$NOTARY_KEY" && -n "$NOTARY_KEY_ID" && -n "$NOTARY_ISSUER" ]]; then
   xcrun notarytool submit "$ZIP_PATH" --key "$NOTARY_KEY" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER" --wait
   xcrun stapler staple "$APP_BUNDLE"
   xcrun stapler validate "$APP_BUNDLE"
+  if [[ -n "$INSTALLER_SIGNING_IDENTITY" ]]; then
+    xcrun notarytool submit "$PKG_PATH" --key "$NOTARY_KEY" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER" --wait
+    xcrun stapler staple "$PKG_PATH"
+    xcrun stapler validate "$PKG_PATH"
+  fi
 fi
 
 if [[ -n "$NOTARY_PROFILE" || ( -n "$NOTARY_KEY" && -n "$NOTARY_KEY_ID" && -n "$NOTARY_ISSUER" ) ]]; then
@@ -86,3 +148,4 @@ if [[ -n "$NOTARY_PROFILE" || ( -n "$NOTARY_KEY" && -n "$NOTARY_KEY_ID" && -n "$
 fi
 
 echo "$ZIP_PATH"
+echo "$PKG_PATH"

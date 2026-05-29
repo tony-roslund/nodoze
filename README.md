@@ -11,7 +11,7 @@ pmset -a disablesleep 1
 pmset -a disablesleep 0
 ```
 
-Because this setting requires administrator privileges, nodoze prompts through macOS when the toggle changes.
+Because this setting requires administrator privileges, the release installer installs a narrow privileged helper at `/Library/PrivilegedHelperTools/io.nodoze.helper`. The menu bar app only asks that helper to read or toggle `disablesleep`.
 
 ## App
 
@@ -41,25 +41,32 @@ The website is a static Vite app and is ready to deploy on Vercel with:
 - Build command: `npm run build`
 - Output directory: `dist`
 
-## Release Checklist
+## Installer Release Checklist
 
 1. Create a Developer ID Application certificate.
-2. Sign `dist/nodoze.app`.
-3. Notarize and staple the app.
-4. Package a `.dmg` or `.zip`.
-5. Upload the build and update `https://nodoze.io/appcast.json`.
+2. Create a Developer ID Installer certificate.
+3. Sign `nodoze.app` and `io.nodoze.helper`.
+4. Build a `.pkg` that installs:
+   - `/Applications/nodoze.app`
+   - `/Library/PrivilegedHelperTools/io.nodoze.helper`
+5. Sign, notarize, and staple the `.pkg`.
+6. Upload the build and update `https://nodoze.io/appcast.json`.
 
-The release helper signs and zips the app:
+The release helper signs the app/helper and builds both `.zip` and `.pkg` artifacts:
 
 ```sh
 ./script/package_release.sh
 ```
 
-To notarize in the same pass after storing notary credentials:
+To sign and notarize the installer in the same pass:
 
 ```sh
-NOTARY_PROFILE=nodoze-notary-api ./script/package_release.sh
+INSTALLER_SIGNING_IDENTITY="Developer ID Installer: Anthony Roslund (9456DA7AJR)" \
+NOTARY_PROFILE=nodoze-notary-api \
+./script/package_release.sh
 ```
+
+If the Installer certificate is missing, upload `private/DeveloperIDInstaller.certSigningRequest` to Apple Developer as a Developer ID Installer certificate, download the `.cer`, then import it into the login keychain with the matching private key in `private/DeveloperIDInstaller.key`.
 
 ## Links
 

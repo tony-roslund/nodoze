@@ -3,6 +3,7 @@ import NodozeCore
 
 enum PowerManagerError: LocalizedError {
     case commandFailed(command: String, status: Int32, output: String)
+    case helperMissing(path: String)
 
     var errorDescription: String? {
         switch self {
@@ -11,12 +12,21 @@ enum PowerManagerError: LocalizedError {
             return detail.isEmpty
                 ? "\(command) failed with status \(status)."
                 : "\(command) failed with status \(status): \(detail)"
+        case let .helperMissing(path):
+            return "nodoze helper is not installed at \(path). Install nodoze with the installer package, then try again."
         }
     }
 }
 
 struct PowerManager {
+    private static let helperPath = "/Library/PrivilegedHelperTools/io.nodoze.helper"
+
     func sleepIsDisabled() async -> Bool {
+        if FileManager.default.isExecutableFile(atPath: Self.helperPath),
+           let helperOutput = try? await run(Self.helperPath, arguments: ["--sleep-is-disabled"]) {
+            return helperOutput.trimmingCharacters(in: .whitespacesAndNewlines) == "1"
+        }
+
         let outputs = [
             try? await run("/usr/bin/pmset", arguments: ["-g"]),
             try? await run("/usr/bin/pmset", arguments: ["-g", "custom"])
@@ -29,10 +39,12 @@ struct PowerManager {
 
     func setSleepDisabled(_ disabled: Bool) async throws {
         let value = disabled ? "1" : "0"
-        let command = "/usr/bin/pmset -a disablesleep \(value)"
-        let script = "do shell script \"\(command)\" with administrator privileges"
 
-        _ = try await run("/usr/bin/osascript", arguments: ["-e", script])
+        guard FileManager.default.isExecutableFile(atPath: Self.helperPath) else {
+            throw PowerManagerError.helperMissing(path: Self.helperPath)
+        }
+
+        _ = try await run(Self.helperPath, arguments: ["--set-sleep-disabled", value])
     }
 
     private func run(_ executable: String, arguments: [String]) async throws -> String {

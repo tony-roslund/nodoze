@@ -55,7 +55,7 @@ final class AppModel: ObservableObject {
         guard !isBusy else { return }
 
         isBusy = true
-        statusMessage = disabled ? "Requesting permission to keep this Mac awake..." : "Restoring normal lid-close sleep..."
+        statusMessage = disabled ? "Keeping this Mac awake..." : "Restoring normal lid-close sleep..."
 
         Task {
             do {
