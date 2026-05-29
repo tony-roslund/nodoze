@@ -237,15 +237,15 @@ enum EyesIconFactory {
     private static func drawSleepingZs(phase: Int) {
         let strings = ["Z", "z", "z"]
         let positions = [
-            NSPoint(x: 29.4, y: 14.7),
-            NSPoint(x: 32.0, y: 17.2),
-            NSPoint(x: 34.0, y: 19.0),
+            NSPoint(x: 27.0, y: 13.8),
+            NSPoint(x: 30.2, y: 16.7),
+            NSPoint(x: 32.5, y: 18.7),
         ]
 
         for index in strings.indices {
             let age = (index + phase) % strings.count
-            let alpha = [0.35, 0.65, 0.9][age]
-            let size: CGFloat = [5.0, 5.8, 6.6][age]
+            let alpha = [0.55, 0.82, 1.0][age]
+            let size: CGFloat = [5.8, 6.8, 7.8][age]
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: NSFont.boldSystemFont(ofSize: size),
                 .foregroundColor: NSColor.labelColor.withAlphaComponent(alpha),

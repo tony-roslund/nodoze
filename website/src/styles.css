@@ -16,18 +16,24 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.nodoze-zzz {
+  text-shadow:
+    0 1px 3px rgb(0 0 0 / 0.35),
+    0 0 1px rgb(255 255 255 / 0.85);
+}
+
 @keyframes nodoze-sleep-float {
   0% {
-    opacity: 0;
-    transform: translate3d(-0.1rem, 0.35rem, 0) scale(0.72);
+    opacity: 0.2;
+    transform: translate3d(-0.05rem, 0.45rem, 0) scale(0.78);
   }
 
-  18% {
-    opacity: 0.8;
+  26% {
+    opacity: 1;
   }
 
   100% {
     opacity: 0;
-    transform: translate3d(0.35rem, -1.35rem, 0) scale(1.08);
+    transform: translate3d(0.3rem, -1.7rem, 0) scale(1.1);
   }
 }

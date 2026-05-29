@@ -5,7 +5,7 @@ type Size = "sm" | "md" | "lg";
 const sizes = {
   sm: {
     wrap: "h-4 w-8",
-    zPx: 8,
+    zPx: 10,
     maxX: 3,
     maxY: 2,
     pupil: 5,
@@ -14,7 +14,7 @@ const sizes = {
   },
   md: {
     wrap: "h-7 w-14",
-    zPx: 10,
+    zPx: 16,
     maxX: 5,
     maxY: 4,
     pupil: 7,
@@ -23,7 +23,7 @@ const sizes = {
   },
   lg: {
     wrap: "h-24 w-40",
-    zPx: 24,
+    zPx: 30,
     maxX: 12,
     maxY: 10,
     pupil: 14,
@@ -165,22 +165,22 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
       {!enabled ? (
         <>
           <span className="sr-only">Zzz</span>
-          <span className="pointer-events-none absolute inset-0 z-0 text-current opacity-80" aria-hidden="true">
+          <span className="pointer-events-none absolute inset-0 z-20 text-current opacity-95" aria-hidden="true">
             <span
-              className="absolute font-bold tracking-normal [animation:nodoze-sleep-float_2.4s_ease-in-out_infinite]"
-              style={{ top: "-10%", left: "50%", fontSize: config.zPx }}
+              className="nodoze-zzz absolute font-bold tracking-normal [animation:nodoze-sleep-float_2.8s_ease-in-out_infinite] [animation-delay:-900ms]"
+              style={{ top: "-6%", left: "48%", fontSize: config.zPx }}
             >
               Z
             </span>
             <span
-              className="absolute font-bold tracking-normal [animation:nodoze-sleep-float_2.4s_ease-in-out_infinite] [animation-delay:220ms]"
-              style={{ top: "-20%", left: "59%", fontSize: config.zPx * 0.82 }}
+              className="nodoze-zzz absolute font-bold tracking-normal [animation:nodoze-sleep-float_2.8s_ease-in-out_infinite] [animation-delay:-360ms]"
+              style={{ top: "-19%", left: "62%", fontSize: config.zPx * 0.78 }}
             >
               z
             </span>
             <span
-              className="absolute font-bold tracking-normal [animation:nodoze-sleep-float_2.4s_ease-in-out_infinite] [animation-delay:440ms]"
-              style={{ top: "-30%", left: "67%", fontSize: config.zPx * 0.72 }}
+              className="nodoze-zzz absolute font-bold tracking-normal [animation:nodoze-sleep-float_2.8s_ease-in-out_infinite] [animation-delay:260ms]"
+              style={{ top: "-31%", left: "73%", fontSize: config.zPx * 0.68 }}
             >
               z
             </span>
