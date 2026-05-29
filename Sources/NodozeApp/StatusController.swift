@@ -34,7 +34,7 @@ final class StatusController: NSObject {
         button.target = self
         button.action = #selector(handleStatusButton)
         button.sendAction(on: [.leftMouseDown, .rightMouseDown])
-        statusItem.length = 44
+        statusItem.length = 56
         button.imagePosition = .imageOnly
         button.toolTip = "nodoze"
         updateIcon()

@@ -1,6 +1,10 @@
 import AppKit
 
 enum EyesIconFactory {
+    private static let imageSize = NSSize(width: 50, height: 24)
+    private static let leftEye = NSRect(x: 5.0, y: 1.8, width: 18.0, height: 20.0)
+    private static let rightEye = NSRect(x: 23.0, y: 1.8, width: 18.0, height: 20.0)
+
     static func make(
         enabled: Bool,
         busy: Bool,
@@ -9,24 +13,20 @@ enum EyesIconFactory {
         blinking: Bool = false,
         sleepingPhase: Int = 0
     ) -> NSImage {
-        let size = NSSize(width: 38, height: 22)
-        let image = NSImage(size: size)
+        let image = NSImage(size: imageSize)
 
         image.lockFocus()
         NSGraphicsContext.current?.imageInterpolation = .high
 
         if busy {
-            drawBusy(in: NSRect(origin: .zero, size: size))
+            drawOpenEyes(leftPupilOffset: leftPupilOffset, rightPupilOffset: rightPupilOffset)
+            drawBusyUnderline()
         } else if enabled && blinking {
-            drawBlink(in: NSRect(origin: .zero, size: size))
+            drawBlink()
         } else if enabled {
-            drawOpenEyes(
-                in: NSRect(origin: .zero, size: size),
-                leftPupilOffset: leftPupilOffset,
-                rightPupilOffset: rightPupilOffset
-            )
+            drawOpenEyes(leftPupilOffset: leftPupilOffset, rightPupilOffset: rightPupilOffset)
         } else {
-            drawDroopyEyes(in: NSRect(origin: .zero, size: size), sleepingPhase: sleepingPhase)
+            drawDroopyEyes(sleepingPhase: sleepingPhase)
         }
 
         image.unlockFocus()
@@ -35,280 +35,261 @@ enum EyesIconFactory {
     }
 
     private static func drawOpenEyes(
-        in rect: NSRect,
         leftPupilOffset: CGPoint = .zero,
         rightPupilOffset: CGPoint = .zero
     ) {
-        let stroke = NSColor.labelColor
-        let fill = NSColor.controlBackgroundColor
-        let pupil = NSColor.labelColor
-        let left = NSRect(x: 4.5, y: 2.4, width: 14.5, height: 17)
-        let right = NSRect(x: 19, y: 2.4, width: 14.5, height: 17)
-
-        for eye in [left, right] {
-            let path = NSBezierPath(ovalIn: eye)
-            fill.setFill()
-            path.fill()
-            stroke.setStroke()
-            path.lineWidth = 1.45
-            path.stroke()
-        }
-
+        drawEyeShells()
         drawBrows(enabled: true)
-
-        pupil.setFill()
-        NSBezierPath(ovalIn: NSRect(
-            x: 11.8 + leftPupilOffset.x,
-            y: 8.2 + leftPupilOffset.y,
-            width: 5.2,
-            height: 5.2
-        )).fill()
-        NSBezierPath(ovalIn: NSRect(
-            x: 21.5 + rightPupilOffset.x,
-            y: 8.2 + rightPupilOffset.y,
-            width: 5.2,
-            height: 5.2
-        )).fill()
-
-        let highlight = NSColor.controlBackgroundColor.withAlphaComponent(0.9)
-        highlight.setFill()
-        NSBezierPath(ovalIn: NSRect(x: 13.2 + leftPupilOffset.x, y: 11.8 + leftPupilOffset.y, width: 1.2, height: 1.2)).fill()
-        NSBezierPath(ovalIn: NSRect(x: 22.9 + rightPupilOffset.x, y: 11.8 + rightPupilOffset.y, width: 1.2, height: 1.2)).fill()
+        drawPupils(leftOffset: leftPupilOffset, rightOffset: rightPupilOffset, lowered: false)
+        drawOpenLidDetails()
     }
 
-    private static func drawDroopyEyes(in rect: NSRect, sleepingPhase: Int = 0) {
-        let stroke = NSColor.labelColor
-        let fill = NSColor.controlBackgroundColor
-        let left = NSRect(x: 4.5, y: 3.2, width: 14.5, height: 15)
-        let right = NSRect(x: 19, y: 3.2, width: 14.5, height: 15)
-
-        for eye in [left, right] {
-            let path = NSBezierPath(ovalIn: eye)
-            fill.setFill()
-            path.fill()
-            stroke.setStroke()
-            path.lineWidth = 1.45
-            path.stroke()
-        }
-
+    private static func drawDroopyEyes(sleepingPhase: Int) {
+        drawEyeShells()
         drawBrows(enabled: false)
-
-        stroke.setFill()
-        NSBezierPath(ovalIn: NSRect(x: 12, y: 5.6, width: 4.4, height: 4.4)).fill()
-        NSBezierPath(ovalIn: NSRect(x: 21.7, y: 5.6, width: 4.4, height: 4.4)).fill()
-
-        let eyelid = sleepLidColor()
-        eyelid.setFill()
-        for eye in [left, right] {
-            NSGraphicsContext.saveGraphicsState()
-            NSBezierPath(ovalIn: eye).addClip()
-            NSRect(x: eye.minX - 1, y: 9.2, width: eye.width + 2, height: 10).fill()
-            NSGraphicsContext.restoreGraphicsState()
-        }
-
-        stroke.setStroke()
-        let leftLid = NSBezierPath()
-        leftLid.move(to: NSPoint(x: 4.5, y: 9.5))
-        leftLid.curve(
-            to: NSPoint(x: 19, y: 9.1),
-            controlPoint1: NSPoint(x: 8.4, y: 7.1),
-            controlPoint2: NSPoint(x: 15.2, y: 7.4)
-        )
-        leftLid.lineWidth = 2.25
-        leftLid.stroke()
-
-        let rightLid = NSBezierPath()
-        rightLid.move(to: NSPoint(x: 19, y: 9.1))
-        rightLid.curve(
-            to: NSPoint(x: 33.5, y: 9.5),
-            controlPoint1: NSPoint(x: 23.0, y: 7.4),
-            controlPoint2: NSPoint(x: 29.6, y: 7.1)
-        )
-        rightLid.lineWidth = 2.25
-        rightLid.stroke()
-
-        NSColor.labelColor.withAlphaComponent(0.38).setStroke()
-        let leftFold = NSBezierPath()
-        leftFold.move(to: NSPoint(x: 6.2, y: 13.1))
-        leftFold.curve(
-            to: NSPoint(x: 17.0, y: 12.4),
-            controlPoint1: NSPoint(x: 9.6, y: 14.7),
-            controlPoint2: NSPoint(x: 13.4, y: 14.3)
-        )
-        leftFold.lineWidth = 0.9
-        leftFold.lineCapStyle = .round
-        leftFold.stroke()
-
-        let rightFold = NSBezierPath()
-        rightFold.move(to: NSPoint(x: 21.0, y: 12.4))
-        rightFold.curve(
-            to: NSPoint(x: 31.8, y: 13.1),
-            controlPoint1: NSPoint(x: 24.6, y: 14.3),
-            controlPoint2: NSPoint(x: 28.4, y: 14.7)
-        )
-        rightFold.lineWidth = 0.9
-        rightFold.lineCapStyle = .round
-        rightFold.stroke()
-
+        drawPupils(leftOffset: CGPoint(x: -0.8, y: -3.9), rightOffset: CGPoint(x: 0.8, y: -3.9), lowered: true)
+        drawDroopyLids()
         drawTiredLines()
         drawSleepingZs(phase: sleepingPhase)
     }
 
-    private static func drawBusy(in rect: NSRect) {
-        drawOpenEyes(in: rect)
+    private static func drawBlink() {
+        drawEyeShells()
+        drawBrows(enabled: true)
 
-        NSColor.systemGreen.withAlphaComponent(0.9).setStroke()
-        let path = NSBezierPath()
-        path.move(to: NSPoint(x: 5, y: 2.5))
-        path.curve(
-            to: NSPoint(x: 25, y: 2.5),
-            controlPoint1: NSPoint(x: 10, y: 0.5),
-            controlPoint2: NSPoint(x: 20, y: 0.5)
-        )
-        path.lineWidth = 1.4
+        for eye in [leftEye, rightEye] {
+            drawUpperLidFill(for: eye, openness: 0.02, color: lidColor())
+            drawUpperLidEdge(for: eye, openness: 0.02, alpha: 0.9, width: 1.8)
+        }
+    }
+
+    private static func drawEyeShells() {
+        for eye in [leftEye, rightEye] {
+            let path = NSBezierPath(ovalIn: eye)
+            eyeColor().setFill()
+            path.fill()
+            strokeColor().setStroke()
+            path.lineWidth = 1.25
+            path.stroke()
+        }
+    }
+
+    private static func drawPupils(leftOffset: CGPoint, rightOffset: CGPoint, lowered: Bool) {
+        let leftCenter = CGPoint(x: leftEye.midX + leftOffset.x, y: leftEye.midY + leftOffset.y)
+        let rightCenter = CGPoint(x: rightEye.midX + rightOffset.x, y: rightEye.midY + rightOffset.y)
+        let radius: CGFloat = lowered ? 2.9 : 3.4
+
+        strokeColor().setFill()
+        NSBezierPath(ovalIn: NSRect(x: leftCenter.x - radius, y: leftCenter.y - radius, width: radius * 2, height: radius * 2)).fill()
+        NSBezierPath(ovalIn: NSRect(x: rightCenter.x - radius, y: rightCenter.y - radius, width: radius * 2, height: radius * 2)).fill()
+
+        NSColor.white.withAlphaComponent(0.92).setFill()
+        NSBezierPath(ovalIn: NSRect(x: leftCenter.x - 1.4, y: leftCenter.y + 1.0, width: 1.3, height: 1.3)).fill()
+        NSBezierPath(ovalIn: NSRect(x: rightCenter.x - 1.4, y: rightCenter.y + 1.0, width: 1.3, height: 1.3)).fill()
+    }
+
+    private static func drawOpenLidDetails() {
+        for eye in [leftEye, rightEye] {
+            drawUpperLidEdge(for: eye, openness: 0.98, alpha: 0.25, width: 1.0)
+            drawLowerLidEdge(for: eye, alpha: 0.22)
+        }
+    }
+
+    private static func drawDroopyLids() {
+        for eye in [leftEye, rightEye] {
+            drawUpperLidFill(for: eye, openness: 0.16, color: lidColor())
+            drawUpperLidEdge(for: eye, openness: 0.16, alpha: 0.9, width: 1.75)
+            drawLidCrease(for: eye, alpha: 0.52)
+        }
+    }
+
+    private static func drawUpperLidFill(for eye: NSRect, openness: CGFloat, color: NSColor) {
+        let path = upperLidPath(for: eye, openness: openness)
+
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(ovalIn: eye).addClip()
+        color.setFill()
+        path.fill()
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    private static func drawUpperLidEdge(for eye: NSRect, openness: CGFloat, alpha: CGFloat, width: CGFloat) {
+        strokeColor().withAlphaComponent(alpha).setStroke()
+        let path = upperLidEdgePath(for: eye, openness: openness)
+        path.lineWidth = width
+        path.lineCapStyle = .round
         path.stroke()
     }
 
-    private static func drawBlink(in rect: NSRect) {
-        let stroke = NSColor.labelColor
-        let fill = NSColor.controlBackgroundColor
-        let left = NSRect(x: 4.5, y: 5.2, width: 14.5, height: 11)
-        let right = NSRect(x: 19, y: 5.2, width: 14.5, height: 11)
+    private static func drawLowerLidEdge(for eye: NSRect, alpha: CGFloat) {
+        strokeColor().withAlphaComponent(alpha).setStroke()
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: eye.minX + 3.2, y: eye.minY + 2.0))
+        path.curve(
+            to: NSPoint(x: eye.maxX - 3.2, y: eye.minY + 2.0),
+            controlPoint1: NSPoint(x: eye.midX - 4.0, y: eye.minY - 0.8),
+            controlPoint2: NSPoint(x: eye.midX + 4.0, y: eye.minY - 0.8)
+        )
+        path.lineWidth = 0.95
+        path.lineCapStyle = .round
+        path.stroke()
+    }
 
-        for eye in [left, right] {
-            let path = NSBezierPath(ovalIn: eye)
-            fill.setFill()
-            path.fill()
-            stroke.setStroke()
-            path.lineWidth = 1.45
-            path.stroke()
+    private static func drawLidCrease(for eye: NSRect, alpha: CGFloat) {
+        strokeColor().withAlphaComponent(alpha).setStroke()
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: eye.minX + 2.7, y: eye.maxY - 6.8))
+        path.curve(
+            to: NSPoint(x: eye.maxX - 2.7, y: eye.maxY - 6.5),
+            controlPoint1: NSPoint(x: eye.midX - 4.0, y: eye.maxY - 4.2),
+            controlPoint2: NSPoint(x: eye.midX + 4.0, y: eye.maxY - 4.2)
+        )
+        path.lineWidth = 0.85
+        path.lineCapStyle = .round
+        path.stroke()
+    }
+
+    private static func upperLidPath(for eye: NSRect, openness: CGFloat) -> NSBezierPath {
+        let closedness = 1 - openness
+        let sideY = eye.maxY - 4.0 - closedness * 6.5
+        let centerY = eye.maxY - 1.6 - closedness * 17.0
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: eye.minX - 1.2, y: eye.maxY + 3.0))
+        path.line(to: NSPoint(x: eye.maxX + 1.2, y: eye.maxY + 3.0))
+        path.line(to: NSPoint(x: eye.maxX + 1.2, y: sideY))
+        path.curve(
+            to: NSPoint(x: eye.minX - 1.2, y: sideY),
+            controlPoint1: NSPoint(x: eye.midX + 7.0, y: centerY),
+            controlPoint2: NSPoint(x: eye.midX - 7.0, y: centerY)
+        )
+        path.close()
+        return path
+    }
+
+    private static func upperLidEdgePath(for eye: NSRect, openness: CGFloat) -> NSBezierPath {
+        let closedness = 1 - openness
+        let sideY = eye.maxY - 4.0 - closedness * 6.5
+        let centerY = eye.maxY - 1.6 - closedness * 17.0
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: eye.minX - 1.2, y: sideY))
+        path.curve(
+            to: NSPoint(x: eye.maxX + 1.2, y: sideY),
+            controlPoint1: NSPoint(x: eye.midX - 7.0, y: centerY),
+            controlPoint2: NSPoint(x: eye.midX + 7.0, y: centerY)
+        )
+        return path
+    }
+
+    private static func drawBrows(enabled: Bool) {
+        strokeColor().setStroke()
+
+        let left = NSBezierPath()
+        let right = NSBezierPath()
+
+        if enabled {
+            left.move(to: NSPoint(x: leftEye.minX + 0.2, y: leftEye.maxY + 0.2))
+            left.curve(
+                to: NSPoint(x: leftEye.maxX - 1.6, y: leftEye.maxY - 0.2),
+                controlPoint1: NSPoint(x: leftEye.minX + 4.0, y: leftEye.maxY + 4.2),
+                controlPoint2: NSPoint(x: leftEye.midX + 1.0, y: leftEye.maxY + 4.0)
+            )
+
+            right.move(to: NSPoint(x: rightEye.minX + 1.6, y: rightEye.maxY - 0.2))
+            right.curve(
+                to: NSPoint(x: rightEye.maxX - 0.2, y: rightEye.maxY + 0.2),
+                controlPoint1: NSPoint(x: rightEye.midX - 1.0, y: rightEye.maxY + 4.0),
+                controlPoint2: NSPoint(x: rightEye.maxX - 4.0, y: rightEye.maxY + 4.2)
+            )
+        } else {
+            left.move(to: NSPoint(x: leftEye.minX + 0.6, y: leftEye.maxY - 0.4))
+            left.curve(
+                to: NSPoint(x: leftEye.maxX - 1.4, y: leftEye.maxY - 3.0),
+                controlPoint1: NSPoint(x: leftEye.minX + 4.0, y: leftEye.maxY + 1.2),
+                controlPoint2: NSPoint(x: leftEye.midX + 1.0, y: leftEye.maxY + 0.5)
+            )
+
+            right.move(to: NSPoint(x: rightEye.minX + 1.4, y: rightEye.maxY - 3.0))
+            right.curve(
+                to: NSPoint(x: rightEye.maxX - 0.6, y: rightEye.maxY - 0.4),
+                controlPoint1: NSPoint(x: rightEye.midX - 1.0, y: rightEye.maxY + 0.5),
+                controlPoint2: NSPoint(x: rightEye.maxX - 4.0, y: rightEye.maxY + 1.2)
+            )
         }
 
-        drawBrows(enabled: true)
-
-        stroke.setStroke()
-        for x in [4.5, 19] {
-            let lid = NSBezierPath()
-            lid.move(to: NSPoint(x: x, y: 10.4))
-            lid.curve(
-                to: NSPoint(x: x + 14.5, y: 10.4),
-                controlPoint1: NSPoint(x: x + 4, y: 8.8),
-                controlPoint2: NSPoint(x: x + 10.5, y: 8.8)
-            )
-            lid.lineWidth = 2
-            lid.stroke()
+        for brow in [left, right] {
+            brow.lineWidth = 1.85
+            brow.lineCapStyle = .round
+            brow.stroke()
         }
     }
 
     private static func drawTiredLines() {
-        NSColor.labelColor.withAlphaComponent(0.55).setStroke()
+        strokeColor().withAlphaComponent(0.5).setStroke()
 
-        let underLines = [
-            (NSPoint(x: 7.0, y: 3.2), NSPoint(x: 17.0, y: 3.4), NSPoint(x: 9.4, y: 1.6), NSPoint(x: 14.4, y: 1.9)),
-            (NSPoint(x: 21.0, y: 3.5), NSPoint(x: 31.2, y: 3.1), NSPoint(x: 23.6, y: 1.9), NSPoint(x: 28.5, y: 1.5)),
-            (NSPoint(x: 8.7, y: 1.2), NSPoint(x: 15.8, y: 1.3), NSPoint(x: 10.6, y: 0.4), NSPoint(x: 13.8, y: 0.4)),
-            (NSPoint(x: 22.6, y: 1.3), NSPoint(x: 29.6, y: 1.1), NSPoint(x: 24.5, y: 0.4), NSPoint(x: 27.6, y: 0.3)),
+        let lines = [
+            (NSPoint(x: leftEye.minX + 1.0, y: leftEye.midY - 1.5), NSPoint(x: leftEye.minX - 3.0, y: leftEye.midY - 2.5)),
+            (NSPoint(x: leftEye.minX + 1.0, y: leftEye.midY - 4.2), NSPoint(x: leftEye.minX - 2.7, y: leftEye.midY - 4.9)),
+            (NSPoint(x: rightEye.maxX - 1.0, y: rightEye.midY - 1.4), NSPoint(x: rightEye.maxX + 3.0, y: rightEye.midY - 2.6)),
+            (NSPoint(x: rightEye.maxX - 1.0, y: rightEye.midY - 4.0), NSPoint(x: rightEye.maxX + 2.8, y: rightEye.midY - 4.8)),
         ]
 
-        for line in underLines {
+        for line in lines {
             let path = NSBezierPath()
             path.move(to: line.0)
-            path.curve(to: line.1, controlPoint1: line.2, controlPoint2: line.3)
-            path.lineWidth = line.0.y > 2 ? 0.95 : 0.75
+            path.line(to: line.1)
+            path.lineWidth = 0.75
             path.lineCapStyle = .round
             path.stroke()
         }
 
-        let outerLines = [
-            (NSPoint(x: 3.7, y: 7.7), NSPoint(x: 0.7, y: 6.9)),
-            (NSPoint(x: 3.6, y: 5.7), NSPoint(x: 0.7, y: 5.0)),
-            (NSPoint(x: 3.9, y: 3.9), NSPoint(x: 1.4, y: 2.7)),
-            (NSPoint(x: 34.3, y: 7.5), NSPoint(x: 37.1, y: 6.2)),
-            (NSPoint(x: 34.4, y: 5.5), NSPoint(x: 37.2, y: 4.8)),
-            (NSPoint(x: 34.1, y: 3.9), NSPoint(x: 36.4, y: 2.5)),
-        ]
-
-        for line in outerLines {
-            let path = NSBezierPath()
-            path.move(to: line.0)
-            path.line(to: line.1)
-            path.lineWidth = 0.85
-            path.lineCapStyle = .round
-            path.stroke()
+        for eye in [leftEye, rightEye] {
+            drawLowerLidEdge(for: eye, alpha: 0.28)
         }
     }
 
     private static func drawSleepingZs(phase: Int) {
         let strings = ["Z", "z", "z"]
         let positions = [
-            NSPoint(x: 27.0, y: 13.8),
-            NSPoint(x: 30.2, y: 16.7),
-            NSPoint(x: 32.5, y: 18.7),
+            NSPoint(x: 34.0, y: 14.2),
+            NSPoint(x: 38.1, y: 17.1),
+            NSPoint(x: 41.2, y: 19.2),
         ]
 
         for index in strings.indices {
             let age = (index + phase) % strings.count
-            let alpha = [0.55, 0.82, 1.0][age]
-            let size: CGFloat = [5.8, 6.8, 7.8][age]
+            let alpha = [0.48, 0.72, 0.95][age]
+            let size: CGFloat = [4.8, 5.5, 6.2][age]
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: NSFont.boldSystemFont(ofSize: size),
-                .foregroundColor: NSColor.labelColor.withAlphaComponent(alpha),
+                .foregroundColor: strokeColor().withAlphaComponent(alpha),
             ]
             strings[index].draw(at: positions[index], withAttributes: attributes)
         }
     }
 
-    private static func sleepLidColor() -> NSColor {
-        NSColor(red: 0.87, green: 0.83, blue: 0.75, alpha: 0.98)
+    private static func drawBusyUnderline() {
+        NSColor.systemGreen.withAlphaComponent(0.9).setStroke()
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: leftEye.minX + 1.2, y: 0.8))
+        path.curve(
+            to: NSPoint(x: rightEye.maxX - 5.0, y: 0.8),
+            controlPoint1: NSPoint(x: leftEye.midX, y: -0.8),
+            controlPoint2: NSPoint(x: rightEye.midX, y: -0.8)
+        )
+        path.lineWidth = 1.1
+        path.lineCapStyle = .round
+        path.stroke()
     }
 
-    private static func drawBrows(enabled: Bool) {
-        NSColor.labelColor.setStroke()
+    private static func strokeColor() -> NSColor {
+        NSColor(red: 0.07, green: 0.07, blue: 0.08, alpha: 1)
+    }
 
-        if enabled {
-            let left = NSBezierPath()
-            left.move(to: NSPoint(x: 4.2, y: 19.0))
-            left.curve(
-                to: NSPoint(x: 17.0, y: 18.2),
-                controlPoint1: NSPoint(x: 7.8, y: 21.2),
-                controlPoint2: NSPoint(x: 12.5, y: 21.6)
-            )
-            left.lineWidth = 2.0
-            left.lineCapStyle = .round
-            left.stroke()
+    private static func eyeColor() -> NSColor {
+        NSColor(red: 1.0, green: 0.99, blue: 0.97, alpha: 1)
+    }
 
-            let right = NSBezierPath()
-            right.move(to: NSPoint(x: 21.0, y: 18.2))
-            right.curve(
-                to: NSPoint(x: 33.8, y: 19.0),
-                controlPoint1: NSPoint(x: 25.5, y: 21.6),
-                controlPoint2: NSPoint(x: 30.2, y: 21.2)
-            )
-            right.lineWidth = 2.0
-            right.lineCapStyle = .round
-            right.stroke()
-        } else {
-            let left = NSBezierPath()
-            left.move(to: NSPoint(x: 5.0, y: 17.2))
-            left.curve(
-                to: NSPoint(x: 17.2, y: 15.2),
-                controlPoint1: NSPoint(x: 9.0, y: 18.5),
-                controlPoint2: NSPoint(x: 13.0, y: 17.8)
-            )
-            left.lineWidth = 1.8
-            left.lineCapStyle = .round
-            left.stroke()
-
-            let right = NSBezierPath()
-            right.move(to: NSPoint(x: 20.8, y: 15.2))
-            right.curve(
-                to: NSPoint(x: 33.0, y: 17.2),
-                controlPoint1: NSPoint(x: 25.0, y: 17.8),
-                controlPoint2: NSPoint(x: 29.0, y: 18.5)
-            )
-            right.lineWidth = 1.8
-            right.lineCapStyle = .round
-            right.stroke()
-        }
+    private static func lidColor() -> NSColor {
+        NSColor(red: 0.87, green: 0.84, blue: 0.78, alpha: 1)
     }
 }

@@ -90,7 +90,7 @@ PLIST
 
 /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP_BUNDLE"
 /usr/bin/codesign --verify --strict --verbose=2 "$HELPER_BINARY"
-/usr/bin/ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
+/usr/bin/ditto -c -k --norsrc --noextattr --keepParent "$APP_BUNDLE" "$ZIP_PATH"
 
 mkdir -p "$PKG_ROOT/Applications" "$PKG_ROOT/Library/PrivilegedHelperTools" "$PKG_SCRIPTS"
 /usr/bin/ditto --norsrc --noextattr "$APP_BUNDLE" "$PKG_ROOT/Applications/$DISPLAY_NAME.app"
@@ -144,7 +144,7 @@ fi
 
 if [[ -n "$NOTARY_PROFILE" || ( -n "$NOTARY_KEY" && -n "$NOTARY_KEY_ID" && -n "$NOTARY_ISSUER" ) ]]; then
   rm -f "$ZIP_PATH"
-  /usr/bin/ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
+  /usr/bin/ditto -c -k --norsrc --noextattr --keepParent "$APP_BUNDLE" "$ZIP_PATH"
 fi
 
 echo "$ZIP_PATH"
