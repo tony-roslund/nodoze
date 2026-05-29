@@ -1,5 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
+import { FooterIconLink } from "./components/FooterIconLink";
 import { GooglyEyes } from "./components/GooglyEyes";
 import { MenuBarCallout } from "./components/MenuBarCallout";
 import { TopMenuBar } from "./components/TopMenuBar";
@@ -40,22 +41,18 @@ export default function App() {
         <footer className="mx-auto flex w-full max-w-6xl shrink-0 items-center justify-between gap-4 px-5 py-4 text-sm/6 text-zinc-600 sm:px-8 lg:px-10">
           <p className="hidden sm:block">MIT licensed. Built by 74Lab.</p>
           <div className="flex items-center gap-3">
-            <a
+            <FooterIconLink
               href="https://x.com/tonyroslund"
-              title="@tonyroslund"
-              className="grid size-8 place-items-center font-normal text-zinc-700 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-              aria-label="Tony Roslund on X, @tonyroslund"
-            >
-              <FaXTwitter className="size-4 h-lh shrink-0 fill-current" aria-hidden="true" />
-            </a>
-            <a
+              label="X"
+              detail="@tonyroslund"
+              icon={FaXTwitter}
+            />
+            <FooterIconLink
               href="https://github.com/tony-roslund/nodoze"
-              title="tony-roslund"
-              className="grid size-8 place-items-center font-normal text-zinc-700 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-              aria-label="nodoze source on GitHub, tony-roslund"
-            >
-              <FaGithub className="size-4 h-lh shrink-0 fill-current" aria-hidden="true" />
-            </a>
+              label="GitHub"
+              detail="tony-roslund"
+              icon={FaGithub}
+            />
           </div>
         </footer>
       </div>
