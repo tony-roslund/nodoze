@@ -1,4 +1,5 @@
-import { ChevronRight, Github, X } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { GooglyEyes } from "./components/GooglyEyes";
 import { MenuBarDemo } from "./components/MenuBarDemo";
 
@@ -38,24 +39,24 @@ export default function App() {
           </div>
         </section>
 
-        <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-zinc-950/10 py-4 text-sm/6 text-zinc-600">
+        <footer className="flex shrink-0 items-center justify-between gap-4 py-4 text-sm/6 text-zinc-600">
           <p className="hidden sm:block">MIT licensed. Built by 74Lab.</p>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3">
             <a
               href="https://x.com/tonyroslund"
-              className="inline-flex items-center gap-2 font-normal text-zinc-700 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-              aria-label="Tony Roslund on X"
+              title="@tonyroslund"
+              className="grid size-8 place-items-center font-normal text-zinc-700 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+              aria-label="Tony Roslund on X, @tonyroslund"
             >
-              <X className="size-4 h-lh shrink-0" aria-hidden="true" />
-              <span>@tonyroslund</span>
+              <FaXTwitter className="size-4 h-lh shrink-0 fill-current" aria-hidden="true" />
             </a>
             <a
               href="https://github.com/tony-roslund/nodoze"
-              className="inline-flex items-center gap-2 font-normal text-zinc-700 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
-              aria-label="nodoze source on GitHub"
+              title="tony-roslund"
+              className="grid size-8 place-items-center font-normal text-zinc-700 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+              aria-label="nodoze source on GitHub, tony-roslund"
             >
-              <Github className="size-4 h-lh shrink-0" aria-hidden="true" />
-              <span>tony-roslund</span>
+              <FaGithub className="size-4 h-lh shrink-0 fill-current" aria-hidden="true" />
             </a>
           </div>
         </footer>
