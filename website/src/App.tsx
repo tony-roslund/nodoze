@@ -21,7 +21,7 @@ export default function App() {
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <a
-                href="/download/nodoze-0.1.0.zip"
+                href="/download/nodoze-0.1.0.pkg"
                 className="inline-flex items-center gap-2 rounded-md bg-zinc-950 py-2.5 pr-3.5 pl-3 text-base/6 font-medium text-white ring-1 ring-zinc-950 hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 sm:py-2 sm:pr-3 sm:pl-2.5 sm:text-sm/6"
               >
                 Download for Mac

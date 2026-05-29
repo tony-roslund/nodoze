@@ -261,7 +261,7 @@ enum EyesIconFactory {
             let size: CGFloat = [4.8, 5.5, 6.2][age]
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: NSFont.boldSystemFont(ofSize: size),
-                .foregroundColor: strokeColor().withAlphaComponent(alpha),
+                .foregroundColor: sleepTextColor().withAlphaComponent(alpha),
             ]
             strings[index].draw(at: positions[index], withAttributes: attributes)
         }
@@ -291,5 +291,9 @@ enum EyesIconFactory {
 
     private static func lidColor() -> NSColor {
         NSColor(red: 0.87, green: 0.84, blue: 0.78, alpha: 1)
+    }
+
+    private static func sleepTextColor() -> NSColor {
+        NSColor(red: 0.62, green: 0.62, blue: 0.64, alpha: 1)
     }
 }
