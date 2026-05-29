@@ -1,30 +1,13 @@
-import { BatteryFull, ChevronRight, Search, Wifi } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { GooglyEyes } from "./components/GooglyEyes";
+import { TopMenuBar } from "./components/TopMenuBar";
 
 export default function App() {
   return (
     <main className="isolate flex h-dvh overflow-hidden bg-[#f7f7f4] text-zinc-950 antialiased">
       <div className="flex min-h-0 w-full flex-col">
-        <header className="shrink-0 border-b border-zinc-950/10 bg-zinc-100/85 px-3 py-1.5 shadow-sm shadow-zinc-950/5 backdrop-blur">
-          <div className="flex h-7 items-center justify-between gap-3 text-sm/6 text-zinc-700 sm:text-xs/5">
-            <div className="flex min-w-0 items-center gap-4">
-              <a href="/" aria-label="Homepage" className="flex items-center gap-2 font-semibold text-zinc-950">
-                <GooglyEyes size="sm" />
-                <span>nodoze</span>
-              </a>
-              <span className="hidden text-zinc-500 sm:inline">File</span>
-              <span className="hidden text-zinc-500 sm:inline">Edit</span>
-              <span className="hidden text-zinc-500 md:inline">View</span>
-            </div>
-            <div className="flex shrink-0 items-center gap-3 text-zinc-500">
-              <Search className="hidden size-4 h-lh shrink-0 stroke-current sm:block" aria-hidden="true" />
-              <Wifi className="hidden size-4 h-lh shrink-0 stroke-current sm:block" aria-hidden="true" />
-              <BatteryFull className="hidden size-4 h-lh shrink-0 stroke-current sm:block" aria-hidden="true" />
-              <span>Fri 2:49 PM</span>
-            </div>
-          </div>
-        </header>
+        <TopMenuBar />
 
         <section className="mx-auto grid min-h-0 w-full max-w-6xl flex-1 grid-cols-1 items-center gap-7 px-5 pb-4 sm:px-8 lg:grid-cols-[10fr_11fr] lg:gap-10 lg:px-10 lg:pb-6">
           <div className="max-w-2xl">
