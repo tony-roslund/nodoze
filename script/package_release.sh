@@ -28,6 +28,7 @@ HELPER_ID="io.nodoze.helper"
 HELPER_BINARY="$RELEASE_DIR/$HELPER_ID"
 PKG_ROOT="$RELEASE_DIR/pkg-root"
 PKG_SCRIPTS="$RELEASE_DIR/pkg-scripts"
+COMPONENT_PLIST="$RELEASE_DIR/component.plist"
 COMPONENT_PKG="$RELEASE_DIR/$DISPLAY_NAME-component.pkg"
 PKG_PATH="$RELEASE_DIR/$DISPLAY_NAME-$VERSION.pkg"
 
@@ -98,6 +99,9 @@ cp -X "$HELPER_BINARY" "$PKG_ROOT/Library/PrivilegedHelperTools/$HELPER_ID"
 /usr/bin/xattr -cr "$PKG_ROOT"
 find "$PKG_ROOT" -name '._*' -delete
 
+pkgbuild --analyze --root "$PKG_ROOT" "$COMPONENT_PLIST"
+/usr/libexec/PlistBuddy -c "Set :0:BundleIsRelocatable false" "$COMPONENT_PLIST"
+
 cat >"$PKG_SCRIPTS/postinstall" <<SCRIPT
 #!/bin/sh
 set -e
@@ -110,6 +114,7 @@ chmod +x "$PKG_SCRIPTS/postinstall"
 pkgbuild \
   --root "$PKG_ROOT" \
   --scripts "$PKG_SCRIPTS" \
+  --component-plist "$COMPONENT_PLIST" \
   --filter '.*[.][_].*' \
   --filter '(^|/)\.DS_Store$' \
   --identifier "$BUNDLE_ID" \
