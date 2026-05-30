@@ -5,6 +5,8 @@ struct AgentMonitorConfiguration: Sendable {
     var monitorClaudeCode: Bool
     var monitorCursor: Bool
     var monitorTerminalCLIs: Bool
+    var monitorConductor: Bool
+    var monitorSuperset: Bool
     var customProcessNames: [String]
 }
 
@@ -69,6 +71,24 @@ final class AgentActivityMonitor {
 
         if configuration.monitorTerminalCLIs {
             append("Terminal CLI", matches: terminalCommandProcesses(from: processes))
+        }
+
+        if configuration.monitorConductor {
+            append("Conductor", matches: processes.matchingAny([
+                "Conductor",
+                "conductor",
+                "com.conductor.app",
+                "Application Support/com.conductor.app"
+            ]))
+        }
+
+        if configuration.monitorSuperset {
+            append("Superset", matches: processes.matchingAny([
+                "Superset",
+                "superset",
+                ".superset/bin",
+                "SUPERSET_AGENT"
+            ]))
         }
 
         let customMatches = processes.matchingAny(configuration.customProcessNames)

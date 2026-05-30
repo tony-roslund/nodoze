@@ -68,13 +68,33 @@ struct SettingsView: View {
                                     set: { model.setMonitorTerminalCLIs($0) }
                                 ))
                             }
+
+                            GridRow {
+                                Toggle("Conductor", isOn: Binding(
+                                    get: { model.monitorConductor },
+                                    set: { model.setMonitorConductor($0) }
+                                ))
+                                Toggle("Superset", isOn: Binding(
+                                    get: { model.monitorSuperset },
+                                    set: { model.setMonitorSuperset($0) }
+                                ))
+                            }
                         }
 
-                        TextField("Custom process names, e.g. Conductor, Superset", text: Binding(
-                            get: { model.customAgentProcessNames },
-                            set: { model.setCustomAgentProcessNames($0) }
-                        ))
-                        .textFieldStyle(.roundedBorder)
+                        DisclosureGroup("Advanced") {
+                            VStack(alignment: .leading, spacing: 6) {
+                                TextField("Custom process names, comma separated", text: Binding(
+                                    get: { model.customAgentProcessNames },
+                                    set: { model.setCustomAgentProcessNames($0) }
+                                ))
+                                .textFieldStyle(.roundedBorder)
+
+                                Text("Use this for niche tools that are not listed above.")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.top, 6)
+                        }
 
                         Stepper(
                             "Turn off after \(model.agentIdleGraceMinutes) min of no activity",

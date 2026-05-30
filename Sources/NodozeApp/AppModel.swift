@@ -13,6 +13,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var monitorClaudeCode = true
     @Published private(set) var monitorCursor = true
     @Published private(set) var monitorTerminalCLIs = true
+    @Published private(set) var monitorConductor = true
+    @Published private(set) var monitorSuperset = true
     @Published private(set) var customAgentProcessNames = ""
     @Published private(set) var agentIdleGraceMinutes = 10
     @Published var automaticUpdateChecks: Bool {
@@ -34,6 +36,8 @@ final class AppModel: ObservableObject {
         static let monitorClaudeCode = "monitorClaudeCode"
         static let monitorCursor = "monitorCursor"
         static let monitorTerminalCLIs = "monitorTerminalCLIs"
+        static let monitorConductor = "monitorConductor"
+        static let monitorSuperset = "monitorSuperset"
         static let customAgentProcessNames = "customAgentProcessNames"
         static let agentIdleGraceMinutes = "agentIdleGraceMinutes"
     }
@@ -66,6 +70,8 @@ final class AppModel: ObservableObject {
         monitorClaudeCode = defaults.object(forKey: DefaultsKey.monitorClaudeCode) as? Bool ?? true
         monitorCursor = defaults.object(forKey: DefaultsKey.monitorCursor) as? Bool ?? true
         monitorTerminalCLIs = defaults.object(forKey: DefaultsKey.monitorTerminalCLIs) as? Bool ?? true
+        monitorConductor = defaults.object(forKey: DefaultsKey.monitorConductor) as? Bool ?? true
+        monitorSuperset = defaults.object(forKey: DefaultsKey.monitorSuperset) as? Bool ?? true
         customAgentProcessNames = defaults.string(forKey: DefaultsKey.customAgentProcessNames) ?? ""
         let savedGrace = defaults.integer(forKey: DefaultsKey.agentIdleGraceMinutes)
         agentIdleGraceMinutes = savedGrace > 0 ? savedGrace : 10
@@ -179,6 +185,18 @@ final class AppModel: ObservableObject {
         refreshAgentMonitoringConfiguration()
     }
 
+    func setMonitorConductor(_ enabled: Bool) {
+        monitorConductor = enabled
+        defaults.set(enabled, forKey: DefaultsKey.monitorConductor)
+        refreshAgentMonitoringConfiguration()
+    }
+
+    func setMonitorSuperset(_ enabled: Bool) {
+        monitorSuperset = enabled
+        defaults.set(enabled, forKey: DefaultsKey.monitorSuperset)
+        refreshAgentMonitoringConfiguration()
+    }
+
     func setCustomAgentProcessNames(_ names: String) {
         customAgentProcessNames = names
         defaults.set(names, forKey: DefaultsKey.customAgentProcessNames)
@@ -257,6 +275,8 @@ final class AppModel: ObservableObject {
             monitorClaudeCode: monitorClaudeCode,
             monitorCursor: monitorCursor,
             monitorTerminalCLIs: monitorTerminalCLIs,
+            monitorConductor: monitorConductor,
+            monitorSuperset: monitorSuperset,
             customProcessNames: parsedCustomAgentProcessNames
         )
 
