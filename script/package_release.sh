@@ -21,8 +21,10 @@ RELEASE_DIR="$ROOT_DIR/release"
 APP_BUNDLE="$RELEASE_DIR/$DISPLAY_NAME.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
+APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
+APP_ICON="$ROOT_DIR/Resources/AppIcon.icns"
 ZIP_PATH="$RELEASE_DIR/$DISPLAY_NAME-$VERSION.zip"
 PKG_ROOT="$RELEASE_DIR/pkg-root"
 COMPONENT_PLIST="$RELEASE_DIR/component.plist"
@@ -30,13 +32,14 @@ COMPONENT_PKG="$RELEASE_DIR/$DISPLAY_NAME-component.pkg"
 PKG_PATH="$RELEASE_DIR/$DISPLAY_NAME-$VERSION.pkg"
 
 rm -rf "$RELEASE_DIR"
-mkdir -p "$APP_MACOS"
+mkdir -p "$APP_MACOS" "$APP_RESOURCES"
 
 swift build --package-path "$ROOT_DIR" --configuration release --product "$APP_NAME"
 BUILD_BINARY="$(swift build --package-path "$ROOT_DIR" --configuration release --product "$APP_NAME" --show-bin-path)/$APP_NAME"
 
 cp "$BUILD_BINARY" "$APP_BINARY"
 chmod +x "$APP_BINARY"
+cp "$APP_ICON" "$APP_RESOURCES/AppIcon.icns"
 
 cat >"$INFO_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -49,6 +52,8 @@ cat >"$INFO_PLIST" <<PLIST
   <string>$APP_NAME</string>
   <key>CFBundleIdentifier</key>
   <string>$BUNDLE_ID</string>
+  <key>CFBundleIconFile</key>
+  <string>AppIcon</string>
   <key>CFBundleName</key>
   <string>$DISPLAY_NAME</string>
   <key>CFBundlePackageType</key>
