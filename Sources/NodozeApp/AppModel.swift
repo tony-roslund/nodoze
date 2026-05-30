@@ -17,6 +17,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var monitorSuperset = true
     @Published private(set) var customAgentProcessNames = ""
     @Published private(set) var agentIdleGraceMinutes = 10
+    @Published private(set) var menuBarIconStyle: MenuBarIconStyle = .fullColor
     @Published var automaticUpdateChecks: Bool {
         didSet {
             defaults.set(automaticUpdateChecks, forKey: DefaultsKey.automaticUpdateChecks)
@@ -40,6 +41,7 @@ final class AppModel: ObservableObject {
         static let monitorSuperset = "monitorSuperset"
         static let customAgentProcessNames = "customAgentProcessNames"
         static let agentIdleGraceMinutes = "agentIdleGraceMinutes"
+        static let menuBarIconStyle = "menuBarIconStyle"
     }
 
     private let defaults: UserDefaults
@@ -75,6 +77,10 @@ final class AppModel: ObservableObject {
         customAgentProcessNames = defaults.string(forKey: DefaultsKey.customAgentProcessNames) ?? ""
         let savedGrace = defaults.integer(forKey: DefaultsKey.agentIdleGraceMinutes)
         agentIdleGraceMinutes = savedGrace > 0 ? savedGrace : 10
+        if let savedStyle = defaults.string(forKey: DefaultsKey.menuBarIconStyle),
+           let style = MenuBarIconStyle(rawValue: savedStyle) {
+            menuBarIconStyle = style
+        }
         openAtLogin = loginItemManager.isEnabled
     }
 
@@ -208,6 +214,14 @@ final class AppModel: ObservableObject {
         agentIdleGraceMinutes = clamped
         defaults.set(clamped, forKey: DefaultsKey.agentIdleGraceMinutes)
         refreshAgentMonitoringConfiguration()
+    }
+
+    func setMenuBarIconStyle(_ style: MenuBarIconStyle) {
+        menuBarIconStyle = style
+        defaults.set(style.rawValue, forKey: DefaultsKey.menuBarIconStyle)
+        statusMessage = style == .monochrome
+            ? "Menu bar icon set to monochrome."
+            : "Menu bar icon set to full color."
     }
 
     func checkForUpdates(silent: Bool = false) {

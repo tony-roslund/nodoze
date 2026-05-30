@@ -6,7 +6,11 @@ struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(spacing: 12) {
-                Image(nsImage: EyesIconFactory.make(enabled: model.sleepDisabled, busy: model.isBusy))
+                Image(nsImage: EyesIconFactory.make(
+                    enabled: model.sleepDisabled,
+                    busy: model.isBusy,
+                    style: model.menuBarIconStyle
+                ))
                     .resizable()
                     .interpolation(.high)
                     .scaledToFit()
@@ -34,6 +38,15 @@ struct SettingsView: View {
                     get: { model.allowDisplaySleepWhileActive },
                     set: { model.setAllowDisplaySleepWhileActive($0) }
                 ))
+
+                Picker("Menu bar icon", selection: Binding(
+                    get: { model.menuBarIconStyle },
+                    set: { model.setMenuBarIconStyle($0) }
+                )) {
+                    Text("Full Color").tag(MenuBarIconStyle.fullColor)
+                    Text("Monochrome").tag(MenuBarIconStyle.monochrome)
+                }
+                .pickerStyle(.radioGroup)
 
                 Toggle("Keep active until agents are finished", isOn: Binding(
                     get: { model.keepActiveUntilAgentsFinish },

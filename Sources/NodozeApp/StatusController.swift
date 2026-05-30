@@ -47,6 +47,11 @@ final class StatusController: NSObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateIcon() }
             .store(in: &cancellables)
+
+        model.$menuBarIconStyle
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateIcon() }
+            .store(in: &cancellables)
     }
 
     private func updateIcon() {
@@ -55,6 +60,7 @@ final class StatusController: NSObject {
         button.image = EyesIconFactory.make(
             enabled: model.sleepDisabled,
             busy: model.isBusy,
+            style: model.menuBarIconStyle,
             leftPupilOffset: leftPupilOffset,
             rightPupilOffset: rightPupilOffset,
             blinking: isBlinking,
@@ -175,6 +181,14 @@ final class StatusController: NSObject {
         automaticUpdates.state = model.automaticUpdateChecks ? .on : .off
         menu.addItem(automaticUpdates)
 
+        let monochromeIcon = NSMenuItem(
+            title: "Monochrome Icon",
+            action: #selector(toggleMonochromeIcon),
+            keyEquivalent: ""
+        )
+        monochromeIcon.state = model.menuBarIconStyle == .monochrome ? .on : .off
+        menu.addItem(monochromeIcon)
+
         let keepUntilAgentsFinish = NSMenuItem(
             title: "Keep Until Agents Finish",
             action: #selector(toggleKeepUntilAgentsFinish),
@@ -214,6 +228,10 @@ final class StatusController: NSObject {
 
     @objc private func toggleAutomaticUpdateChecks() {
         model.setAutomaticUpdateChecks(!model.automaticUpdateChecks)
+    }
+
+    @objc private func toggleMonochromeIcon() {
+        model.setMenuBarIconStyle(model.menuBarIconStyle == .monochrome ? .fullColor : .monochrome)
     }
 
     @objc private func toggleKeepUntilAgentsFinish() {

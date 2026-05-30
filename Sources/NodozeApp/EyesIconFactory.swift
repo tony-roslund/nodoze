@@ -1,5 +1,10 @@
 import AppKit
 
+enum MenuBarIconStyle: String {
+    case fullColor
+    case monochrome
+}
+
 enum EyesIconFactory {
     private static let imageSize = NSSize(width: 56, height: 28)
     private static let leftEye = NSRect(x: 8.0, y: 2.6, width: 19.0, height: 22.0)
@@ -8,6 +13,7 @@ enum EyesIconFactory {
     static func make(
         enabled: Bool,
         busy: Bool,
+        style: MenuBarIconStyle = .fullColor,
         leftPupilOffset: CGPoint = .zero,
         rightPupilOffset: CGPoint = .zero,
         blinking: Bool = false,
@@ -18,7 +24,16 @@ enum EyesIconFactory {
         image.lockFocus()
         NSGraphicsContext.current?.imageInterpolation = .high
 
-        if busy {
+        if style == .monochrome {
+            drawMonochromeIcon(
+                enabled: enabled,
+                busy: busy,
+                leftPupilOffset: leftPupilOffset,
+                rightPupilOffset: rightPupilOffset,
+                blinking: blinking,
+                sleepingPhase: sleepingPhase
+            )
+        } else if busy {
             drawOpenEyes(leftPupilOffset: leftPupilOffset, rightPupilOffset: rightPupilOffset)
             drawBusyUnderline()
         } else if enabled && blinking {
@@ -30,8 +45,152 @@ enum EyesIconFactory {
         }
 
         image.unlockFocus()
-        image.isTemplate = false
+        image.isTemplate = style == .monochrome
         return image
+    }
+
+    private static func drawMonochromeIcon(
+        enabled: Bool,
+        busy: Bool,
+        leftPupilOffset: CGPoint,
+        rightPupilOffset: CGPoint,
+        blinking: Bool,
+        sleepingPhase: Int
+    ) {
+        if enabled && blinking {
+            drawMonochromeBlink()
+        } else if enabled || busy {
+            drawMonochromeOpenEyes(leftPupilOffset: leftPupilOffset, rightPupilOffset: rightPupilOffset)
+        } else {
+            drawMonochromeDroopyEyes(sleepingPhase: sleepingPhase)
+        }
+
+        if busy {
+            drawMonochromeBusyUnderline()
+        }
+    }
+
+    private static func drawMonochromeOpenEyes(leftPupilOffset: CGPoint, rightPupilOffset: CGPoint) {
+        drawMonochromeEyeOutlines()
+        drawMonochromeBrows(enabled: true)
+        drawMonochromePupils(leftOffset: leftPupilOffset, rightOffset: rightPupilOffset, lowered: false)
+    }
+
+    private static func drawMonochromeDroopyEyes(sleepingPhase: Int) {
+        drawMonochromeEyeOutlines()
+        drawMonochromeBrows(enabled: false)
+        drawMonochromePupils(leftOffset: CGPoint(x: -0.6, y: -3.6), rightOffset: CGPoint(x: 0.6, y: -3.6), lowered: true)
+
+        for eye in [leftEye, rightEye] {
+            drawMonochromeUpperLid(for: eye, openness: 0.16)
+        }
+
+        drawMonochromeSleepingZs(phase: sleepingPhase)
+    }
+
+    private static func drawMonochromeBlink() {
+        for eye in [leftEye, rightEye] {
+            drawMonochromeUpperLid(for: eye, openness: 0.02)
+        }
+        drawMonochromeBrows(enabled: true)
+    }
+
+    private static func drawMonochromeEyeOutlines() {
+        templateColor(alpha: 0.95).setStroke()
+
+        for eye in [leftEye, rightEye] {
+            let path = NSBezierPath(ovalIn: eye)
+            path.lineWidth = 1.55
+            path.stroke()
+        }
+    }
+
+    private static func drawMonochromePupils(leftOffset: CGPoint, rightOffset: CGPoint, lowered: Bool) {
+        let leftCenter = CGPoint(x: leftEye.midX + leftOffset.x, y: leftEye.midY + leftOffset.y)
+        let rightCenter = CGPoint(x: rightEye.midX + rightOffset.x, y: rightEye.midY + rightOffset.y)
+        let radius: CGFloat = lowered ? 2.7 : 3.35
+
+        templateColor(alpha: 1.0).setFill()
+        NSBezierPath(ovalIn: NSRect(x: leftCenter.x - radius, y: leftCenter.y - radius, width: radius * 2, height: radius * 2)).fill()
+        NSBezierPath(ovalIn: NSRect(x: rightCenter.x - radius, y: rightCenter.y - radius, width: radius * 2, height: radius * 2)).fill()
+    }
+
+    private static func drawMonochromeUpperLid(for eye: NSRect, openness: CGFloat) {
+        templateColor(alpha: 1.0).setStroke()
+        let path = upperLidEdgePath(for: eye, openness: openness)
+        path.lineWidth = 2.0
+        path.lineCapStyle = .round
+        path.stroke()
+    }
+
+    private static func drawMonochromeBrows(enabled: Bool) {
+        templateColor(alpha: 1.0).setStroke()
+
+        let left = NSBezierPath()
+        let right = NSBezierPath()
+
+        if enabled {
+            left.move(to: NSPoint(x: leftEye.minX + 0.7, y: leftEye.maxY + 0.3))
+            left.curve(
+                to: NSPoint(x: leftEye.maxX - 2.0, y: leftEye.maxY - 0.3),
+                controlPoint1: NSPoint(x: leftEye.minX + 4.2, y: leftEye.maxY + 3.6),
+                controlPoint2: NSPoint(x: leftEye.midX + 0.8, y: leftEye.maxY + 3.5)
+            )
+
+            right.move(to: NSPoint(x: rightEye.minX + 2.0, y: rightEye.maxY - 0.3))
+            right.curve(
+                to: NSPoint(x: rightEye.maxX - 0.7, y: rightEye.maxY + 0.3),
+                controlPoint1: NSPoint(x: rightEye.midX - 0.8, y: rightEye.maxY + 3.5),
+                controlPoint2: NSPoint(x: rightEye.maxX - 4.2, y: rightEye.maxY + 3.6)
+            )
+        } else {
+            left.move(to: NSPoint(x: leftEye.minX + 0.7, y: leftEye.maxY - 0.6))
+            left.curve(
+                to: NSPoint(x: leftEye.maxX - 2.0, y: leftEye.maxY - 3.0),
+                controlPoint1: NSPoint(x: leftEye.minX + 4.0, y: leftEye.maxY + 0.8),
+                controlPoint2: NSPoint(x: leftEye.midX + 1.0, y: leftEye.maxY + 0.3)
+            )
+
+            right.move(to: NSPoint(x: rightEye.minX + 2.0, y: rightEye.maxY - 3.0))
+            right.curve(
+                to: NSPoint(x: rightEye.maxX - 0.7, y: rightEye.maxY - 0.6),
+                controlPoint1: NSPoint(x: rightEye.midX - 1.0, y: rightEye.maxY + 0.3),
+                controlPoint2: NSPoint(x: rightEye.maxX - 4.0, y: rightEye.maxY + 0.8)
+            )
+        }
+
+        for brow in [left, right] {
+            brow.lineWidth = 1.7
+            brow.lineCapStyle = .round
+            brow.stroke()
+        }
+    }
+
+    private static func drawMonochromeSleepingZs(phase: Int) {
+        let strings = ["Z", "z"]
+        let positions = [
+            NSPoint(x: 42.0, y: 17.8),
+            NSPoint(x: 46.0, y: 21.0),
+        ]
+
+        for index in strings.indices {
+            let age = (index + phase) % strings.count
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: NSFont.boldSystemFont(ofSize: age == 0 ? 5.5 : 4.8),
+                .foregroundColor: templateColor(alpha: age == 0 ? 0.9 : 0.62),
+            ]
+            strings[index].draw(at: positions[index], withAttributes: attributes)
+        }
+    }
+
+    private static func drawMonochromeBusyUnderline() {
+        templateColor(alpha: 0.85).setStroke()
+        let path = NSBezierPath()
+        path.move(to: NSPoint(x: leftEye.minX + 2.0, y: 0.9))
+        path.line(to: NSPoint(x: rightEye.maxX - 6.0, y: 0.9))
+        path.lineWidth = 1.2
+        path.lineCapStyle = .round
+        path.stroke()
     }
 
     private static func drawOpenEyes(
@@ -293,5 +452,9 @@ enum EyesIconFactory {
 
     private static func sleepTextColor() -> NSColor {
         NSColor(red: 0.62, green: 0.62, blue: 0.64, alpha: 1)
+    }
+
+    private static func templateColor(alpha: CGFloat) -> NSColor {
+        NSColor.black.withAlphaComponent(alpha)
     }
 }
