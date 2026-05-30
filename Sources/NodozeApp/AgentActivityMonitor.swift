@@ -17,7 +17,7 @@ struct AgentActivityReport: Sendable {
 
     var summary: String {
         guard isActive else {
-            return "No selected agents are active."
+            return "No watched agents are active."
         }
 
         let joinedLabels = labels.prefix(3).joined(separator: ", ")

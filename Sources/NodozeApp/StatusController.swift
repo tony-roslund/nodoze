@@ -190,7 +190,7 @@ final class StatusController: NSObject {
         menu.addItem(monochromeIcon)
 
         let keepUntilAgentsFinish = NSMenuItem(
-            title: "Keep Until Agents Finish",
+            title: "Keep Awake for Agents",
             action: #selector(toggleKeepUntilAgentsFinish),
             keyEquivalent: ""
         )

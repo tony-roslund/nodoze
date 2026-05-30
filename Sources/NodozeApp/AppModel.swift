@@ -162,7 +162,7 @@ final class AppModel: ObservableObject {
         keepActiveUntilAgentsFinish = enabled
         defaults.set(enabled, forKey: DefaultsKey.keepActiveUntilAgentsFinish)
         statusMessage = enabled
-            ? "nodoze will turn off after monitored agents go quiet."
+            ? "nodoze will stay awake while watched agents are running."
             : "Agent activity monitoring is off."
         configureAgentMonitoring()
     }
@@ -257,13 +257,13 @@ final class AppModel: ObservableObject {
         guard sleepDisabled, keepActiveUntilAgentsFinish else {
             lastAgentActivityAt = nil
             agentActivitySummary = keepActiveUntilAgentsFinish
-                ? "Agent monitor starts when nodoze is on."
+                ? "Agent watching starts when nodoze is on."
                 : "Agent monitor is off."
             return
         }
 
         lastAgentActivityAt = Date()
-        agentActivitySummary = "Checking monitored agents..."
+        agentActivitySummary = "Checking watched agents..."
         runAgentActivityCheck()
 
         agentMonitorTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
@@ -277,7 +277,7 @@ final class AppModel: ObservableObject {
         guard sleepDisabled, keepActiveUntilAgentsFinish else { return }
 
         lastAgentActivityAt = Date()
-        agentActivitySummary = "Checking monitored agents..."
+        agentActivitySummary = "Checking watched agents..."
         runAgentActivityCheck()
     }
 
@@ -323,12 +323,12 @@ final class AppModel: ObservableObject {
         let remainingSeconds = max(0, graceSeconds - elapsedSeconds)
 
         if remainingSeconds > 0 {
-            agentActivitySummary = "No selected agents active. Turning off in \(Self.minutesText(remainingSeconds))."
+            agentActivitySummary = "No watched agents active. Turning off in \(Self.minutesText(remainingSeconds))."
             return
         }
 
-        agentActivitySummary = "No selected agents active. Turning nodoze off."
-        statusMessage = "No monitored agents were active for \(agentIdleGraceMinutes) min."
+        agentActivitySummary = "No watched agents active. Turning nodoze off."
+        statusMessage = "No watched agents were active for \(agentIdleGraceMinutes) min."
         setSleepDisabled(false)
     }
 

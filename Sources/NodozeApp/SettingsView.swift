@@ -48,75 +48,82 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.radioGroup)
 
-                Toggle("Keep active until agents are finished", isOn: Binding(
+                Toggle("Keep awake while agents are running", isOn: Binding(
                     get: { model.keepActiveUntilAgentsFinish },
                     set: { model.setKeepActiveUntilAgentsFinish($0) }
                 ))
 
                 if model.keepActiveUntilAgentsFinish {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Monitor")
-                            .font(.caption)
+                        Text("nodoze watches common agent tools and turns itself off after they have been idle for the selected duration.")
+                            .font(.footnote)
                             .foregroundStyle(.secondary)
-
-                        Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 18, verticalSpacing: 8) {
-                            GridRow {
-                                Toggle("Codex", isOn: Binding(
-                                    get: { model.monitorCodex },
-                                    set: { model.setMonitorCodex($0) }
-                                ))
-                                Toggle("Claude Code", isOn: Binding(
-                                    get: { model.monitorClaudeCode },
-                                    set: { model.setMonitorClaudeCode($0) }
-                                ))
-                            }
-
-                            GridRow {
-                                Toggle("Cursor", isOn: Binding(
-                                    get: { model.monitorCursor },
-                                    set: { model.setMonitorCursor($0) }
-                                ))
-                                Toggle("Terminal CLIs", isOn: Binding(
-                                    get: { model.monitorTerminalCLIs },
-                                    set: { model.setMonitorTerminalCLIs($0) }
-                                ))
-                            }
-
-                            GridRow {
-                                Toggle("Conductor", isOn: Binding(
-                                    get: { model.monitorConductor },
-                                    set: { model.setMonitorConductor($0) }
-                                ))
-                                Toggle("Superset", isOn: Binding(
-                                    get: { model.monitorSuperset },
-                                    set: { model.setMonitorSuperset($0) }
-                                ))
-                            }
-                        }
-
-                        DisclosureGroup("Advanced") {
-                            VStack(alignment: .leading, spacing: 6) {
-                                TextField("Custom process names, comma separated", text: Binding(
-                                    get: { model.customAgentProcessNames },
-                                    set: { model.setCustomAgentProcessNames($0) }
-                                ))
-                                .textFieldStyle(.roundedBorder)
-
-                                Text("Use this for niche tools that are not listed above.")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .padding(.top, 6)
-                        }
+                            .fixedSize(horizontal: false, vertical: true)
 
                         Stepper(
-                            "Turn off after \(model.agentIdleGraceMinutes) min of no activity",
+                            "Turn off after \(model.agentIdleGraceMinutes) min idle",
                             value: Binding(
                                 get: { model.agentIdleGraceMinutes },
                                 set: { model.setAgentIdleGraceMinutes($0) }
                             ),
                             in: 1...120
                         )
+
+                        DisclosureGroup("Advanced") {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Apps to watch")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
+                                Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 18, verticalSpacing: 8) {
+                                    GridRow {
+                                        Toggle("Codex", isOn: Binding(
+                                            get: { model.monitorCodex },
+                                            set: { model.setMonitorCodex($0) }
+                                        ))
+                                        Toggle("Claude Code", isOn: Binding(
+                                            get: { model.monitorClaudeCode },
+                                            set: { model.setMonitorClaudeCode($0) }
+                                        ))
+                                    }
+
+                                    GridRow {
+                                        Toggle("Cursor", isOn: Binding(
+                                            get: { model.monitorCursor },
+                                            set: { model.setMonitorCursor($0) }
+                                        ))
+                                        Toggle("Terminal CLIs", isOn: Binding(
+                                            get: { model.monitorTerminalCLIs },
+                                            set: { model.setMonitorTerminalCLIs($0) }
+                                        ))
+                                    }
+
+                                    GridRow {
+                                        Toggle("Conductor", isOn: Binding(
+                                            get: { model.monitorConductor },
+                                            set: { model.setMonitorConductor($0) }
+                                        ))
+                                        Toggle("Superset", isOn: Binding(
+                                            get: { model.monitorSuperset },
+                                            set: { model.setMonitorSuperset($0) }
+                                        ))
+                                    }
+                                }
+
+                                VStack(alignment: .leading, spacing: 6) {
+                                    TextField("Custom process names, comma separated", text: Binding(
+                                        get: { model.customAgentProcessNames },
+                                        set: { model.setCustomAgentProcessNames($0) }
+                                    ))
+                                    .textFieldStyle(.roundedBorder)
+
+                                    Text("Use custom names only for niche agent tools that are not listed above.")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .padding(.top, 6)
+                        }
 
                         Text(model.agentActivitySummary)
                             .font(.footnote)
