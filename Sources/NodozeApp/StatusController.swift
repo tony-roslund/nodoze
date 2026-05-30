@@ -175,6 +175,14 @@ final class StatusController: NSObject {
         automaticUpdates.state = model.automaticUpdateChecks ? .on : .off
         menu.addItem(automaticUpdates)
 
+        let keepUntilAgentsFinish = NSMenuItem(
+            title: "Keep Until Agents Finish",
+            action: #selector(toggleKeepUntilAgentsFinish),
+            keyEquivalent: ""
+        )
+        keepUntilAgentsFinish.state = model.keepActiveUntilAgentsFinish ? .on : .off
+        menu.addItem(keepUntilAgentsFinish)
+
         menu.addItem(.separator())
 
         menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettingsItem), keyEquivalent: ","))
@@ -206,6 +214,10 @@ final class StatusController: NSObject {
 
     @objc private func toggleAutomaticUpdateChecks() {
         model.setAutomaticUpdateChecks(!model.automaticUpdateChecks)
+    }
+
+    @objc private func toggleKeepUntilAgentsFinish() {
+        model.setKeepActiveUntilAgentsFinish(!model.keepActiveUntilAgentsFinish)
     }
 
     @objc private func checkForUpdates() {

@@ -35,6 +35,64 @@ struct SettingsView: View {
                     set: { model.setAllowDisplaySleepWhileActive($0) }
                 ))
 
+                Toggle("Keep active until agents are finished", isOn: Binding(
+                    get: { model.keepActiveUntilAgentsFinish },
+                    set: { model.setKeepActiveUntilAgentsFinish($0) }
+                ))
+
+                if model.keepActiveUntilAgentsFinish {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Monitor")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 18, verticalSpacing: 8) {
+                            GridRow {
+                                Toggle("Codex", isOn: Binding(
+                                    get: { model.monitorCodex },
+                                    set: { model.setMonitorCodex($0) }
+                                ))
+                                Toggle("Claude Code", isOn: Binding(
+                                    get: { model.monitorClaudeCode },
+                                    set: { model.setMonitorClaudeCode($0) }
+                                ))
+                            }
+
+                            GridRow {
+                                Toggle("Cursor", isOn: Binding(
+                                    get: { model.monitorCursor },
+                                    set: { model.setMonitorCursor($0) }
+                                ))
+                                Toggle("Terminal CLIs", isOn: Binding(
+                                    get: { model.monitorTerminalCLIs },
+                                    set: { model.setMonitorTerminalCLIs($0) }
+                                ))
+                            }
+                        }
+
+                        TextField("Custom process names, e.g. Conductor, Superset", text: Binding(
+                            get: { model.customAgentProcessNames },
+                            set: { model.setCustomAgentProcessNames($0) }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+
+                        Stepper(
+                            "Turn off after \(model.agentIdleGraceMinutes) min of no activity",
+                            value: Binding(
+                                get: { model.agentIdleGraceMinutes },
+                                set: { model.setAgentIdleGraceMinutes($0) }
+                            ),
+                            in: 1...120
+                        )
+
+                        Text(model.agentActivitySummary)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.leading, 18)
+                }
+
                 Toggle("Check for updates automatically", isOn: $model.automaticUpdateChecks)
             }
             .toggleStyle(.checkbox)
@@ -60,6 +118,6 @@ struct SettingsView: View {
                 .padding(.top, 2)
         }
         .padding(22)
-        .frame(width: 390)
+        .frame(width: 460)
     }
 }
