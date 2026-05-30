@@ -30,6 +30,11 @@ struct SettingsView: View {
                     set: { model.setOpenAtLogin($0) }
                 ))
 
+                Toggle("Allow display to sleep while nodoze is active", isOn: Binding(
+                    get: { model.allowDisplaySleepWhileActive },
+                    set: { model.setAllowDisplaySleepWhileActive($0) }
+                ))
+
                 Toggle("Check for updates automatically", isOn: $model.automaticUpdateChecks)
             }
             .toggleStyle(.checkbox)

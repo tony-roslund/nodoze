@@ -13,12 +13,14 @@ final class AppModel: ObservableObject {
             defaults.set(automaticUpdateChecks, forKey: DefaultsKey.automaticUpdateChecks)
         }
     }
+    @Published private(set) var allowDisplaySleepWhileActive = true
     @Published private(set) var statusMessage = "Ready."
 
     var onAbout: () -> Void = {}
 
     private enum DefaultsKey {
         static let automaticUpdateChecks = "automaticUpdateChecks"
+        static let allowDisplaySleepWhileActive = "allowDisplaySleepWhileActive"
     }
 
     private let defaults: UserDefaults
@@ -37,6 +39,7 @@ final class AppModel: ObservableObject {
         self.loginItemManager = loginItemManager
         self.updateService = updateService
         automaticUpdateChecks = defaults.object(forKey: DefaultsKey.automaticUpdateChecks) as? Bool ?? true
+        allowDisplaySleepWhileActive = defaults.object(forKey: DefaultsKey.allowDisplaySleepWhileActive) as? Bool ?? true
         openAtLogin = loginItemManager.isEnabled
     }
 
@@ -59,7 +62,7 @@ final class AppModel: ObservableObject {
 
         Task {
             do {
-                try await powerManager.setSleepDisabled(disabled)
+                try await powerManager.setSleepDisabled(disabled, allowDisplaySleep: allowDisplaySleepWhileActive)
                 sleepDisabled = await powerManager.sleepIsDisabled()
                 statusMessage = sleepDisabled
                     ? "nodoze is on. Closing the lid will not sleep this Mac."
@@ -80,6 +83,29 @@ final class AppModel: ObservableObject {
         } catch {
             openAtLogin = loginItemManager.isEnabled
             statusMessage = error.localizedDescription
+        }
+    }
+
+    func setAllowDisplaySleepWhileActive(_ enabled: Bool) {
+        allowDisplaySleepWhileActive = enabled
+        defaults.set(enabled, forKey: DefaultsKey.allowDisplaySleepWhileActive)
+
+        guard sleepDisabled else {
+            statusMessage = enabled
+                ? "The display may sleep while nodoze is active."
+                : "The display will stay awake while nodoze is active."
+            return
+        }
+
+        Task {
+            do {
+                try powerManager.updateDisplaySleepAllowed(enabled)
+                statusMessage = enabled
+                    ? "The display may sleep while nodoze is active."
+                    : "The display will stay awake while nodoze is active."
+            } catch {
+                statusMessage = error.localizedDescription
+            }
         }
     }
 

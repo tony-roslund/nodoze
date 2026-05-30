@@ -17,22 +17,31 @@ enum PowerManagerError: LocalizedError {
 
 @MainActor
 final class PowerManager {
-    private var assertionIDs: [IOPMAssertionID] = []
+    private var systemAssertionIDs: [IOPMAssertionID] = []
+    private var displayAssertionID: IOPMAssertionID?
 
     func sleepIsDisabled() async -> Bool {
-        !assertionIDs.isEmpty
+        !systemAssertionIDs.isEmpty
     }
 
-    func setSleepDisabled(_ disabled: Bool) async throws {
+    func setSleepDisabled(_ disabled: Bool, allowDisplaySleep: Bool) async throws {
         if disabled {
-            try acquireAssertions()
+            try acquireAssertions(allowDisplaySleep: allowDisplaySleep)
         } else {
             releaseAssertions()
         }
     }
 
-    private func acquireAssertions() throws {
-        guard assertionIDs.isEmpty else { return }
+    func updateDisplaySleepAllowed(_ allowed: Bool) throws {
+        guard !systemAssertionIDs.isEmpty else { return }
+        try updateDisplaySleepAssertion(allowDisplaySleep: allowed)
+    }
+
+    private func acquireAssertions(allowDisplaySleep: Bool) throws {
+        guard systemAssertionIDs.isEmpty else {
+            try updateDisplaySleepAssertion(allowDisplaySleep: allowDisplaySleep)
+            return
+        }
 
         var createdIDs: [IOPMAssertionID] = []
         do {
@@ -48,20 +57,48 @@ final class PowerManager {
                 type: kIOPMAssertionTypePreventSystemSleep as CFString,
                 name: "nodoze keeps agents running"
             ))
-            assertionIDs = createdIDs
+            systemAssertionIDs = createdIDs
+            try updateDisplaySleepAssertion(allowDisplaySleep: allowDisplaySleep)
         } catch {
             for id in createdIDs {
                 IOPMAssertionRelease(id)
             }
+            if let displayAssertionID {
+                IOPMAssertionRelease(displayAssertionID)
+                self.displayAssertionID = nil
+            }
+            systemAssertionIDs.removeAll()
             throw error
         }
     }
 
     private func releaseAssertions() {
-        for id in assertionIDs {
+        for id in systemAssertionIDs {
             IOPMAssertionRelease(id)
         }
-        assertionIDs.removeAll()
+        systemAssertionIDs.removeAll()
+
+        if let displayAssertionID {
+            IOPMAssertionRelease(displayAssertionID)
+            self.displayAssertionID = nil
+        }
+    }
+
+    private func updateDisplaySleepAssertion(allowDisplaySleep: Bool) throws {
+        if allowDisplaySleep {
+            if let displayAssertionID {
+                IOPMAssertionRelease(displayAssertionID)
+                self.displayAssertionID = nil
+            }
+            return
+        }
+
+        guard displayAssertionID == nil else { return }
+
+        displayAssertionID = try createAssertion(
+            type: kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
+            name: "nodoze keeps the display awake"
+        )
     }
 
     private func createAssertion(type: CFString, name: String) throws -> IOPMAssertionID {
