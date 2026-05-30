@@ -62,8 +62,8 @@ final class StatusController: NSObject {
         )
         button.contentTintColor = nil
         button.toolTip = model.sleepDisabled
-            ? "nodoze is on. Hold for settings."
-            : "nodoze is off. Hold for settings."
+            ? "nodoze is on. Right-click for settings."
+            : "nodoze is off. Right-click for settings."
     }
 
     private func startEyeAnimation() {
@@ -136,7 +136,7 @@ final class StatusController: NSObject {
             return
         }
 
-        if event.type == .rightMouseDown || event.modifierFlags.contains(.control) {
+        if event.type == .rightMouseDown || event.type == .rightMouseUp || event.modifierFlags.contains(.control) {
             openMenu()
             return
         }
@@ -163,6 +163,20 @@ final class StatusController: NSObject {
 
         menu.addItem(.separator())
 
+        let openAtLogin = NSMenuItem(title: "Open at Login", action: #selector(toggleOpenAtLogin), keyEquivalent: "")
+        openAtLogin.state = model.openAtLogin ? .on : .off
+        menu.addItem(openAtLogin)
+
+        let automaticUpdates = NSMenuItem(
+            title: "Check for Updates Automatically",
+            action: #selector(toggleAutomaticUpdateChecks),
+            keyEquivalent: ""
+        )
+        automaticUpdates.state = model.automaticUpdateChecks ? .on : .off
+        menu.addItem(automaticUpdates)
+
+        menu.addItem(.separator())
+
         menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettingsItem), keyEquivalent: ","))
         menu.addItem(NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "u"))
         menu.addItem(NSMenuItem(title: "About nodoze", action: #selector(showAboutItem), keyEquivalent: ""))
@@ -184,6 +198,14 @@ final class StatusController: NSObject {
 
     @objc private func openSettingsItem() {
         openSettings()
+    }
+
+    @objc private func toggleOpenAtLogin() {
+        model.setOpenAtLogin(!model.openAtLogin)
+    }
+
+    @objc private func toggleAutomaticUpdateChecks() {
+        model.setAutomaticUpdateChecks(!model.automaticUpdateChecks)
     }
 
     @objc private func checkForUpdates() {

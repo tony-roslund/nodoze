@@ -83,6 +83,13 @@ final class AppModel: ObservableObject {
         }
     }
 
+    func setAutomaticUpdateChecks(_ enabled: Bool) {
+        automaticUpdateChecks = enabled
+        statusMessage = automaticUpdateChecks
+            ? "nodoze will check for updates automatically."
+            : "Automatic update checks are off."
+    }
+
     func checkForUpdates(silent: Bool = false) {
         if !silent {
             statusMessage = "Checking for updates..."

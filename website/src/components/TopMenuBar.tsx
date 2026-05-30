@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BatteryFull, Search, Settings, Wifi, X } from "lucide-react";
+import { BatteryFull, Check, Search, Settings, Wifi, X } from "lucide-react";
 import { GooglyEyes } from "./GooglyEyes";
 
 export function TopMenuBar() {
@@ -9,6 +9,8 @@ export function TopMenuBar() {
   const [enabled, setEnabled] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [openAtLogin, setOpenAtLogin] = useState(true);
+  const [automaticUpdates, setAutomaticUpdates] = useState(true);
 
   useEffect(() => {
     if (!menuOpen) {
@@ -51,8 +53,13 @@ export function TopMenuBar() {
     }, 450);
   }
 
-  function endPress() {
+  function endPress(button: number, isControlClick: boolean) {
     clearLongPressTimer();
+
+    if (button !== 0 || isControlClick) {
+      longPressOpenedMenu.current = false;
+      return;
+    }
 
     if (longPressOpenedMenu.current) {
       longPressOpenedMenu.current = false;
@@ -80,12 +87,13 @@ export function TopMenuBar() {
             aria-label={enabled ? "Disable nodoze" : "Enable nodoze"}
             aria-pressed={enabled}
             aria-expanded={menuOpen}
+            title={enabled ? "nodoze is on. Right-click for settings." : "nodoze is off. Right-click for settings."}
             onPointerDown={(event) => {
-              if (event.button === 0) {
+              if (event.button === 0 && !event.ctrlKey) {
                 beginPress();
               }
             }}
-            onPointerUp={() => endPress()}
+            onPointerUp={(event) => endPress(event.button, event.ctrlKey)}
             onPointerCancel={() => clearLongPressTimer()}
             onPointerLeave={() => clearLongPressTimer()}
             onKeyDown={(event) => {
@@ -101,7 +109,8 @@ export function TopMenuBar() {
             }}
             onContextMenu={(event) => {
               event.preventDefault();
-              setMenuOpen((value) => !value);
+              clearLongPressTimer();
+              setMenuOpen(true);
             }}
             className="relative grid h-8 w-12 shrink-0 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
           >
@@ -134,6 +143,25 @@ export function TopMenuBar() {
           <div className="my-1 h-px bg-zinc-200" />
           <button
             type="button"
+            aria-pressed={openAtLogin}
+            onClick={() => setOpenAtLogin((value) => !value)}
+            className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-base/7 text-zinc-700 hover:bg-zinc-200 sm:text-sm/6"
+          >
+            <span>Open at Login</span>
+            {openAtLogin ? <Check className="size-4 shrink-0 stroke-zinc-950" aria-hidden="true" /> : <span className="size-4 shrink-0" aria-hidden="true" />}
+          </button>
+          <button
+            type="button"
+            aria-pressed={automaticUpdates}
+            onClick={() => setAutomaticUpdates((value) => !value)}
+            className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-base/7 text-zinc-700 hover:bg-zinc-200 sm:text-sm/6"
+          >
+            <span>Check for Updates Automatically</span>
+            {automaticUpdates ? <Check className="size-4 shrink-0 stroke-zinc-950" aria-hidden="true" /> : <span className="size-4 shrink-0" aria-hidden="true" />}
+          </button>
+          <div className="my-1 h-px bg-zinc-200" />
+          <button
+            type="button"
             onClick={() => {
               setMenuOpen(false);
               setAboutOpen(true);
@@ -149,6 +177,16 @@ export function TopMenuBar() {
             className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-base/7 text-zinc-700 hover:bg-zinc-200 sm:text-sm/6"
           >
             <span>Check for Updates</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMenuOpen(false);
+              setAboutOpen(true);
+            }}
+            className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-base/7 text-zinc-700 hover:bg-zinc-200 sm:text-sm/6"
+          >
+            <span>About nodoze</span>
           </button>
         </div>
       ) : null}
