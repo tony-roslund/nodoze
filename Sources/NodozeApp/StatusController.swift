@@ -8,9 +8,6 @@ final class StatusController: NSObject {
     private let openSettings: () -> Void
     private let showAbout: () -> Void
     private var cancellables = Set<AnyCancellable>()
-    private var longPressTimer: Timer?
-    private var mouseUpMonitor: Any?
-    private var longPressDidOpenMenu = false
     private var eyeTrackingTimer: Timer?
     private var blinkTimer: Timer?
     private var leftPupilOffset = CGPoint.zero
@@ -33,7 +30,7 @@ final class StatusController: NSObject {
 
         button.target = self
         button.action = #selector(handleStatusButton)
-        button.sendAction(on: [.leftMouseDown, .rightMouseDown])
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         statusItem.length = 56
         button.imagePosition = .imageOnly
         button.toolTip = "nodoze"
@@ -144,49 +141,10 @@ final class StatusController: NSObject {
             return
         }
 
-        beginPressTracking()
-    }
-
-    private func beginPressTracking() {
-        longPressTimer?.invalidate()
-        removeMouseUpMonitor()
-        longPressDidOpenMenu = false
-
-        longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.45, repeats: false) { [weak self] _ in
-            Task { @MainActor in
-                self?.longPressDidOpenMenu = true
-                self?.openMenu()
-            }
-        }
-
-        mouseUpMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseUp]) { [weak self] event in
-            Task { @MainActor in
-                guard let self else { return }
-                self.longPressTimer?.invalidate()
-                self.longPressTimer = nil
-
-                if !self.longPressDidOpenMenu {
-                    self.model.toggleSleepDisabled()
-                }
-
-                self.removeMouseUpMonitor()
-            }
-            return event
-        }
-    }
-
-    private func removeMouseUpMonitor() {
-        if let mouseUpMonitor {
-            NSEvent.removeMonitor(mouseUpMonitor)
-        }
-        mouseUpMonitor = nil
+        model.toggleSleepDisabled()
     }
 
     private func openMenu() {
-        removeMouseUpMonitor()
-        longPressTimer?.invalidate()
-        longPressTimer = nil
-
         let menu = NSMenu()
 
         let status = NSMenuItem(

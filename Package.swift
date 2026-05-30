@@ -9,17 +9,12 @@ let package = Package(
     ],
     products: [
         .executable(name: "Nodoze", targets: ["NodozeApp"]),
-        .executable(name: "NodozeHelper", targets: ["NodozeHelper"]),
         .library(name: "NodozeCore", targets: ["NodozeCore"])
     ],
     targets: [
         .target(name: "NodozeCore"),
         .executableTarget(
             name: "NodozeApp",
-            dependencies: ["NodozeCore"]
-        ),
-        .executableTarget(
-            name: "NodozeHelper",
             dependencies: ["NodozeCore"]
         ),
         .testTarget(

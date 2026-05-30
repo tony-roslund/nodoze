@@ -4,14 +4,7 @@ nodoze is a tiny macOS menu bar app for keeping a MacBook awake while the lid is
 
 Free and open source under the MIT License.
 
-The app toggles the macOS power setting:
-
-```sh
-pmset -a disablesleep 1
-pmset -a disablesleep 0
-```
-
-Because this setting requires administrator privileges, the release installer installs a narrow privileged helper at `/Library/PrivilegedHelperTools/io.nodoze.helper`. The menu bar app only asks that helper to read or toggle `disablesleep`.
+The app toggles a macOS power assertion while it is running. It does not require a privileged helper or a password prompt to turn nodoze on and off.
 
 ## App
 
@@ -45,14 +38,12 @@ The website is a static Vite app and is ready to deploy on Vercel with:
 
 1. Create a Developer ID Application certificate.
 2. Create a Developer ID Installer certificate.
-3. Sign `nodoze.app` and `io.nodoze.helper`.
-4. Build a `.pkg` that installs:
-   - `/Applications/nodoze.app`
-   - `/Library/PrivilegedHelperTools/io.nodoze.helper`
+3. Sign `nodoze.app`.
+4. Build a `.pkg` that installs `/Applications/nodoze.app`.
 5. Sign, notarize, and staple the `.pkg`.
 6. Upload the build and update `https://nodoze.io/appcast.json`.
 
-The release helper signs the app/helper and builds both `.zip` and `.pkg` artifacts:
+The release helper signs the app and builds both `.zip` and `.pkg` artifacts:
 
 ```sh
 ./script/package_release.sh

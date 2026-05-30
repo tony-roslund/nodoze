@@ -1,9 +1,8 @@
 import Foundation
-import NodozeCore
+import IOKit.pwr_mgt
 
 enum PowerManagerError: LocalizedError {
     case commandFailed(command: String, status: Int32, output: String)
-    case helperMissing(path: String)
 
     var errorDescription: String? {
         switch self {
@@ -12,67 +11,76 @@ enum PowerManagerError: LocalizedError {
             return detail.isEmpty
                 ? "\(command) failed with status \(status)."
                 : "\(command) failed with status \(status): \(detail)"
-        case let .helperMissing(path):
-            return "nodoze helper is not installed at \(path). Install nodoze with the installer package, then try again."
         }
     }
 }
 
-struct PowerManager {
-    private static let helperPath = "/Library/PrivilegedHelperTools/io.nodoze.helper"
+@MainActor
+final class PowerManager {
+    private var assertionIDs: [IOPMAssertionID] = []
 
     func sleepIsDisabled() async -> Bool {
-        if FileManager.default.isExecutableFile(atPath: Self.helperPath),
-           let helperOutput = try? await run(Self.helperPath, arguments: ["--sleep-is-disabled"]) {
-            return helperOutput.trimmingCharacters(in: .whitespacesAndNewlines) == "1"
-        }
-
-        let outputs = [
-            try? await run("/usr/bin/pmset", arguments: ["-g"]),
-            try? await run("/usr/bin/pmset", arguments: ["-g", "custom"])
-        ]
-        .compactMap(\.self)
-        .joined(separator: "\n")
-
-        return PowerStateParser.sleepIsDisabled(in: outputs)
+        !assertionIDs.isEmpty
     }
 
     func setSleepDisabled(_ disabled: Bool) async throws {
-        let value = disabled ? "1" : "0"
-
-        guard FileManager.default.isExecutableFile(atPath: Self.helperPath) else {
-            throw PowerManagerError.helperMissing(path: Self.helperPath)
+        if disabled {
+            try acquireAssertions()
+        } else {
+            releaseAssertions()
         }
-
-        _ = try await run(Self.helperPath, arguments: ["--set-sleep-disabled", value])
     }
 
-    private func run(_ executable: String, arguments: [String]) async throws -> String {
-        try await Task.detached(priority: .userInitiated) {
-            let process = Process()
-            let output = Pipe()
+    private func acquireAssertions() throws {
+        guard assertionIDs.isEmpty else { return }
 
-            process.executableURL = URL(fileURLWithPath: executable)
-            process.arguments = arguments
-            process.standardOutput = output
-            process.standardError = output
-
-            try process.run()
-            process.waitUntilExit()
-
-            let data = output.fileHandleForReading.readDataToEndOfFile()
-            let text = String(data: data, encoding: .utf8) ?? ""
-
-            guard process.terminationStatus == 0 else {
-                throw PowerManagerError.commandFailed(
-                    command: ([executable] + arguments).joined(separator: " "),
-                    status: process.terminationStatus,
-                    output: text
-                )
+        var createdIDs: [IOPMAssertionID] = []
+        do {
+            createdIDs.append(try createAssertion(
+                type: kIOPMAssertionTypeNoIdleSleep as CFString,
+                name: "nodoze keeps idle sleep disabled"
+            ))
+            createdIDs.append(try createAssertion(
+                type: kIOPMAssertionTypePreventUserIdleSystemSleep as CFString,
+                name: "nodoze keeps this Mac awake"
+            ))
+            createdIDs.append(try createAssertion(
+                type: kIOPMAssertionTypePreventSystemSleep as CFString,
+                name: "nodoze keeps agents running"
+            ))
+            assertionIDs = createdIDs
+        } catch {
+            for id in createdIDs {
+                IOPMAssertionRelease(id)
             }
-
-            return text
+            throw error
         }
-        .value
+    }
+
+    private func releaseAssertions() {
+        for id in assertionIDs {
+            IOPMAssertionRelease(id)
+        }
+        assertionIDs.removeAll()
+    }
+
+    private func createAssertion(type: CFString, name: String) throws -> IOPMAssertionID {
+        var assertionID = IOPMAssertionID(0)
+        let result = IOPMAssertionCreateWithName(
+            type,
+            IOPMAssertionLevel(kIOPMAssertionLevelOn),
+            name as CFString,
+            &assertionID
+        )
+
+        guard result == kIOReturnSuccess else {
+            throw PowerManagerError.commandFailed(
+                command: "IOPMAssertionCreateWithName \(type)",
+                status: Int32(result),
+                output: ""
+            )
+        }
+
+        return assertionID
     }
 }

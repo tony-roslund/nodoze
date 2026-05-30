@@ -1,9 +1,9 @@
 import AppKit
 
 enum EyesIconFactory {
-    private static let imageSize = NSSize(width: 50, height: 24)
-    private static let leftEye = NSRect(x: 5.0, y: 1.8, width: 18.0, height: 20.0)
-    private static let rightEye = NSRect(x: 23.0, y: 1.8, width: 18.0, height: 20.0)
+    private static let imageSize = NSSize(width: 56, height: 28)
+    private static let leftEye = NSRect(x: 8.0, y: 2.6, width: 19.0, height: 22.0)
+    private static let rightEye = NSRect(x: 27.0, y: 2.6, width: 19.0, height: 22.0)
 
     static func make(
         enabled: Bool,
@@ -49,7 +49,7 @@ enum EyesIconFactory {
         drawBrows(enabled: false)
         drawPupils(leftOffset: CGPoint(x: -0.8, y: -3.9), rightOffset: CGPoint(x: 0.8, y: -3.9), lowered: true)
         drawDroopyLids()
-        drawTiredLines()
+        drawSubtleTiredLines()
         drawSleepingZs(phase: sleepingPhase)
     }
 
@@ -223,36 +223,34 @@ enum EyesIconFactory {
         }
     }
 
-    private static func drawTiredLines() {
-        strokeColor().withAlphaComponent(0.5).setStroke()
+    private static func drawSubtleTiredLines() {
+        strokeColor().withAlphaComponent(0.2).setStroke()
 
         let lines = [
-            (NSPoint(x: leftEye.minX + 1.0, y: leftEye.midY - 1.5), NSPoint(x: leftEye.minX - 3.0, y: leftEye.midY - 2.5)),
-            (NSPoint(x: leftEye.minX + 1.0, y: leftEye.midY - 4.2), NSPoint(x: leftEye.minX - 2.7, y: leftEye.midY - 4.9)),
-            (NSPoint(x: rightEye.maxX - 1.0, y: rightEye.midY - 1.4), NSPoint(x: rightEye.maxX + 3.0, y: rightEye.midY - 2.6)),
-            (NSPoint(x: rightEye.maxX - 1.0, y: rightEye.midY - 4.0), NSPoint(x: rightEye.maxX + 2.8, y: rightEye.midY - 4.8)),
+            (NSPoint(x: leftEye.minX + 1.0, y: leftEye.midY - 1.7), NSPoint(x: leftEye.minX - 2.4, y: leftEye.midY - 2.6)),
+            (NSPoint(x: rightEye.maxX - 1.0, y: rightEye.midY - 1.6), NSPoint(x: rightEye.maxX + 2.4, y: rightEye.midY - 2.7)),
         ]
 
         for line in lines {
             let path = NSBezierPath()
             path.move(to: line.0)
             path.line(to: line.1)
-            path.lineWidth = 0.75
+            path.lineWidth = 0.6
             path.lineCapStyle = .round
             path.stroke()
         }
 
         for eye in [leftEye, rightEye] {
-            drawLowerLidEdge(for: eye, alpha: 0.28)
+            drawLowerLidEdge(for: eye, alpha: 0.22)
         }
     }
 
     private static func drawSleepingZs(phase: Int) {
         let strings = ["Z", "z", "z"]
         let positions = [
-            NSPoint(x: 34.0, y: 14.2),
-            NSPoint(x: 38.1, y: 17.1),
-            NSPoint(x: 41.2, y: 19.2),
+            NSPoint(x: 40.0, y: 17.1),
+            NSPoint(x: 44.0, y: 20.2),
+            NSPoint(x: 47.0, y: 22.1),
         ]
 
         for index in strings.indices {
