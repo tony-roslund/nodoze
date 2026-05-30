@@ -78,8 +78,8 @@ function creasePath(cx: number, openness: number, eyeIndex: number) {
 function browPath(cx: number, eyeIndex: number, enabled: boolean) {
   if (!enabled) {
     return eyeIndex === 0
-      ? `M ${cx - 21} 13 C ${cx - 11} 8, ${cx - 2} 9, ${cx + 8} 15`
-      : `M ${cx - 9} 15 C ${cx + 1} 9, ${cx + 11} 8, ${cx + 22} 13`;
+      ? `M ${cx - 28} 25 C ${cx - 14} 8, ${cx + 5} 8, ${cx + 25} 31`
+      : `M ${cx - 25} 31 C ${cx - 5} 8, ${cx + 14} 8, ${cx + 28} 25`;
   }
 
   return eyeIndex === 0
@@ -87,26 +87,29 @@ function browPath(cx: number, eyeIndex: number, enabled: boolean) {
     : `M ${cx - 8} 10 C ${cx + 3} 2, ${cx + 14} 2, ${cx + 24} 12`;
 }
 
+function tiredEyePath(cx: number, eyeIndex: number) {
+  return eyeIndex === 0
+    ? `M ${cx - 33} 53 C ${cx - 28} 30, ${cx - 3} 17, ${cx + 31} 43 C ${cx + 23} 66, ${cx - 15} 71, ${cx - 33} 53 Z`
+    : `M ${cx - 31} 43 C ${cx + 3} 17, ${cx + 28} 30, ${cx + 33} 53 C ${cx + 15} 71, ${cx - 23} 66, ${cx - 31} 43 Z`;
+}
+
+function tiredLidPath(cx: number, eyeIndex: number) {
+  return eyeIndex === 0
+    ? `M ${cx - 35} 53 C ${cx - 15} 47, ${cx + 8} 43, ${cx + 32} 42`
+    : `M ${cx - 32} 42 C ${cx - 8} 43, ${cx + 15} 47, ${cx + 35} 53`;
+}
+
+function tiredLidFillPath(cx: number, eyeIndex: number) {
+  return eyeIndex === 0
+    ? `M ${cx - 35} 53 C ${cx - 15} 47, ${cx + 8} 43, ${cx + 32} 42 L ${cx + 36} -12 L ${cx - 36} -12 Z`
+    : `M ${cx - 32} 42 C ${cx - 8} 43, ${cx + 15} 47, ${cx + 35} 53 L ${cx + 36} -12 L ${cx - 36} -12 Z`;
+}
+
 function tiredLinePaths(cx: number, eyeIndex: number) {
-  const outer = eyeIndex === 0 ? cx - 28 : cx + 28;
-  const direction = eyeIndex === 0 ? -1 : 1;
-
-  if (eyeIndex === 0) {
-    return [
-      `M ${cx - 18} 80 C ${cx - 7} 88, ${cx + 10} 86, ${cx + 19} 78`,
-      `M ${cx - 12} 87 C ${cx - 2} 92, ${cx + 7} 91, ${cx + 15} 84`,
-      `M ${outer} 56 L ${outer + direction * 10} 52`,
-      `M ${outer + 1} 64 L ${outer + direction * 12} 64`,
-      `M ${outer + 1} 72 L ${outer + direction * 9} 78`,
-    ];
-  }
-
   return [
-    `M ${cx - 19} 78 C ${cx - 8} 86, ${cx + 7} 89, ${cx + 18} 80`,
-    `M ${cx - 15} 84 C ${cx - 6} 91, ${cx + 3} 92, ${cx + 12} 87`,
-    `M ${outer} 55 L ${outer + direction * 8} 50`,
-    `M ${outer - 1} 63 L ${outer + direction * 11} 61`,
-    `M ${outer - 1} 71 L ${outer + direction * 10} 75`,
+    eyeIndex === 0
+      ? `M ${cx - 22} 69 C ${cx - 9} 75, ${cx + 9} 75, ${cx + 24} 66`
+      : `M ${cx - 24} 66 C ${cx - 9} 75, ${cx + 9} 75, ${cx + 22} 69`,
   ];
 }
 
@@ -192,15 +195,16 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
         <defs>
           {eyeCenters.map((cx) => (
             <clipPath key={cx} id={`${clipId}-${cx}`}>
-              <ellipse cx={cx} cy={eyeY} rx={eyeRx} ry={eyeRy} />
+              {enabled ? <ellipse cx={cx} cy={eyeY} rx={eyeRx} ry={eyeRy} /> : <path d={tiredEyePath(cx, eyeCenters.indexOf(cx))} />}
             </clipPath>
           ))}
         </defs>
 
         {eyeCenters.map((cx, index) => {
           const crossX = offset.crossed ? (index === 0 ? config.maxX * 0.8 : -config.maxX * 0.8) : offset.x;
-          const pupilX = cx + (enabled ? crossX : index === 0 ? -2 : 2);
-          const pupilY = eyeY + (enabled ? offset.y : 13);
+          const pupilX = cx + (enabled ? crossX : index === 0 ? 8 : -8);
+          const pupilY = eyeY + (enabled ? offset.y : 1);
+          const pupilRadius = enabled ? config.pupil : config.pupil * 0.44;
 
           return (
             <g key={cx}>
@@ -210,21 +214,31 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
                 strokeWidth={config.stroke * 1.45}
                 strokeLinecap="round"
               />
-              <ellipse
-                cx={cx}
-                cy={eyeY}
-                rx={eyeRx}
-                ry={eyeRy}
-                fill={eyeColor}
-                stroke="#18181b"
-                strokeOpacity="0.88"
-                strokeWidth={config.stroke}
-              />
+              {enabled ? (
+                <ellipse
+                  cx={cx}
+                  cy={eyeY}
+                  rx={eyeRx}
+                  ry={eyeRy}
+                  fill={eyeColor}
+                  stroke="#18181b"
+                  strokeOpacity="0.88"
+                  strokeWidth={config.stroke}
+                />
+              ) : (
+                <path d={tiredEyePath(cx, index)} fill={eyeColor} stroke="#18181b" strokeOpacity="0.88" strokeWidth={config.stroke} />
+              )}
               <g clipPath={`url(#${clipId}-${cx})`}>
-                <circle cx={pupilX} cy={pupilY} r={config.pupil} fill="#111113" />
-                <circle cx={pupilX - config.glint} cy={pupilY - config.glint} r={config.glint} fill="white" fillOpacity="0.92" />
-                <path d={lowerLidPath(cx)} fill={enabled ? eyeColor : lidColor} />
-                <path d={upperLidPath(cx, openness)} fill={lidColor} />
+                <circle cx={pupilX} cy={pupilY} r={pupilRadius} fill="#111113" />
+                {enabled ? <circle cx={pupilX - config.glint} cy={pupilY - config.glint} r={config.glint} fill="white" fillOpacity="0.92" /> : null}
+                {enabled ? (
+                  <>
+                    <path d={lowerLidPath(cx)} fill={eyeColor} />
+                    <path d={upperLidPath(cx, openness)} fill={lidColor} />
+                  </>
+                ) : (
+                  <path d={tiredLidFillPath(cx, index)} fill={lidColor} />
+                )}
               </g>
               {!enabled
                 ? tiredLinePaths(cx, index).map((path) => (
@@ -232,33 +246,39 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
                       key={path}
                       d={path}
                       stroke="#111113"
-                      strokeOpacity="0.55"
-                      strokeWidth={config.stroke * 0.72}
+                      strokeOpacity="0.28"
+                      strokeWidth={config.stroke * 0.75}
                       strokeLinecap="round"
                     />
                   ))
                 : null}
-              <path
-                d={upperLidEdgePath(cx, openness)}
-                stroke="#111113"
-                strokeOpacity={enabled && !blinking ? "0.3" : "0.9"}
-                strokeWidth={enabled && !blinking ? config.stroke * 0.8 : config.stroke * 1.1}
-                strokeLinecap="round"
-              />
+              {enabled ? (
+                <path
+                  d={upperLidEdgePath(cx, openness)}
+                  stroke="#111113"
+                  strokeOpacity={enabled && !blinking ? "0.3" : "0.9"}
+                  strokeWidth={enabled && !blinking ? config.stroke * 0.8 : config.stroke * 1.1}
+                  strokeLinecap="round"
+                />
+              ) : (
+                <path d={tiredLidPath(cx, index)} stroke="#111113" strokeOpacity="0.92" strokeWidth={config.stroke * 1.25} strokeLinecap="round" />
+              )}
               <path
                 d={creasePath(cx, openness, index)}
                 stroke="#111113"
-                strokeOpacity={enabled ? "0.18" : "0.52"}
-                strokeWidth={enabled ? config.stroke * 0.8 : config.stroke * 0.95}
+                strokeOpacity={enabled ? "0.18" : "0"}
+                strokeWidth={config.stroke * 0.8}
                 strokeLinecap="round"
               />
-              <path
-                d={`M ${cx - 22} ${eyeY + eyeRy - 6} C ${cx - 8} ${eyeY + eyeRy + 2}, ${cx + 8} ${eyeY + eyeRy + 2}, ${cx + 22} ${eyeY + eyeRy - 6}`}
-                stroke="#111113"
-                strokeOpacity="0.22"
-                strokeWidth={config.stroke * 0.75}
-                strokeLinecap="round"
-              />
+              {enabled ? (
+                <path
+                  d={`M ${cx - 22} ${eyeY + eyeRy - 6} C ${cx - 8} ${eyeY + eyeRy + 2}, ${cx + 8} ${eyeY + eyeRy + 2}, ${cx + 22} ${eyeY + eyeRy - 6}`}
+                  stroke="#111113"
+                  strokeOpacity="0.22"
+                  strokeWidth={config.stroke * 0.75}
+                  strokeLinecap="round"
+                />
+              ) : null}
             </g>
           );
         })}

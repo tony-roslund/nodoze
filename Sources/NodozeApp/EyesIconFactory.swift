@@ -77,15 +77,10 @@ enum EyesIconFactory {
     }
 
     private static func drawMonochromeDroopyEyes(sleepingPhase: Int) {
-        drawMonochromeEyeOutlines()
-        drawMonochromeBrows(enabled: false)
-        drawMonochromePupils(leftOffset: CGPoint(x: -0.6, y: -3.6), rightOffset: CGPoint(x: 0.6, y: -3.6), lowered: true)
-
-        for eye in [leftEye, rightEye] {
-            drawMonochromeUpperLid(for: eye, openness: 0.16)
-        }
-
-        drawMonochromeEyeBags()
+        drawMonochromeTiredEyeShapes()
+        drawMonochromeTiredBrows()
+        drawMonochromeTiredPupils()
+        drawMonochromeTiredLids()
         drawMonochromeSleepingZs(phase: sleepingPhase)
     }
 
@@ -188,6 +183,59 @@ enum EyesIconFactory {
         }
     }
 
+    private static func drawMonochromeTiredEyeShapes() {
+        templateColor(alpha: 0.95).setStroke()
+
+        for (index, eye) in [leftEye, rightEye].enumerated() {
+            let path = tiredEyePath(for: eye, index: index)
+            path.lineWidth = 1.45
+            path.stroke()
+        }
+    }
+
+    private static func drawMonochromeTiredBrows() {
+        templateColor(alpha: 1.0).setStroke()
+
+        for path in tiredBrowPaths() {
+            path.lineWidth = 2.2
+            path.lineCapStyle = .round
+            path.stroke()
+        }
+    }
+
+    private static func drawMonochromeTiredPupils() {
+        templateColor(alpha: 1.0).setFill()
+
+        let pupils = [
+            NSRect(x: leftEye.midX + 2.2, y: leftEye.midY - 2.0, width: 2.0, height: 2.0),
+            NSRect(x: rightEye.midX - 4.2, y: rightEye.midY - 2.0, width: 2.0, height: 2.0),
+        ]
+
+        for pupil in pupils {
+            NSBezierPath(ovalIn: pupil).fill()
+        }
+    }
+
+    private static func drawMonochromeTiredLids() {
+        templateColor(alpha: 0.95).setStroke()
+
+        for (index, eye) in [leftEye, rightEye].enumerated() {
+            let path = tiredLidPath(for: eye, index: index)
+            path.lineWidth = 1.75
+            path.lineCapStyle = .round
+            path.stroke()
+        }
+
+        templateColor(alpha: 0.3).setStroke()
+
+        for (index, eye) in [leftEye, rightEye].enumerated() {
+            let path = tiredBagPath(for: eye, index: index)
+            path.lineWidth = 0.7
+            path.lineCapStyle = .round
+            path.stroke()
+        }
+    }
+
     private static func drawMonochromeSleepingZs(phase: Int) {
         let strings = ["Z", "z"]
         let positions = [
@@ -226,10 +274,11 @@ enum EyesIconFactory {
     }
 
     private static func drawDroopyEyes(sleepingPhase: Int) {
-        drawEyeShells()
-        drawBrows(enabled: false)
-        drawPupils(leftOffset: CGPoint(x: -0.8, y: -3.9), rightOffset: CGPoint(x: 0.8, y: -3.9), lowered: true)
-        drawDroopyLids()
+        drawTiredEyeShells()
+        drawTiredBrows()
+        drawTiredPupils()
+        drawTiredLidFills()
+        drawTiredLidLines()
         drawSubtleTiredLines()
         drawSleepingZs(phase: sleepingPhase)
     }
@@ -405,40 +454,175 @@ enum EyesIconFactory {
     }
 
     private static func drawSubtleTiredLines() {
-        strokeColor().withAlphaComponent(0.2).setStroke()
+        strokeColor().withAlphaComponent(0.24).setStroke()
 
-        let lines = [
-            (NSPoint(x: leftEye.minX + 1.0, y: leftEye.midY - 1.7), NSPoint(x: leftEye.minX - 2.4, y: leftEye.midY - 2.6)),
-            (NSPoint(x: rightEye.maxX - 1.0, y: rightEye.midY - 1.6), NSPoint(x: rightEye.maxX + 2.4, y: rightEye.midY - 2.7)),
-        ]
-
-        for line in lines {
-            let path = NSBezierPath()
-            path.move(to: line.0)
-            path.line(to: line.1)
-            path.lineWidth = 0.6
-            path.lineCapStyle = .round
-            path.stroke()
-        }
-
-        for eye in [leftEye, rightEye] {
-            drawLowerLidEdge(for: eye, alpha: 0.22)
-        }
-
-        strokeColor().withAlphaComponent(0.36).setStroke()
-
-        for eye in [leftEye, rightEye] {
-            let path = NSBezierPath()
-            path.move(to: NSPoint(x: eye.minX + 4.0, y: eye.minY + 1.7))
-            path.curve(
-                to: NSPoint(x: eye.maxX - 4.0, y: eye.minY + 1.8),
-                controlPoint1: NSPoint(x: eye.midX - 3.8, y: eye.minY - 0.4),
-                controlPoint2: NSPoint(x: eye.midX + 3.8, y: eye.minY - 0.4)
-            )
+        for (index, eye) in [leftEye, rightEye].enumerated() {
+            let path = tiredBagPath(for: eye, index: index)
             path.lineWidth = 0.7
             path.lineCapStyle = .round
             path.stroke()
         }
+    }
+
+    private static func drawTiredEyeShells() {
+        for (index, eye) in [leftEye, rightEye].enumerated() {
+            let path = tiredEyePath(for: eye, index: index)
+            eyeColor().setFill()
+            path.fill()
+            strokeColor().setStroke()
+            path.lineWidth = 1.25
+            path.stroke()
+        }
+    }
+
+    private static func drawTiredBrows() {
+        strokeColor().setStroke()
+
+        for path in tiredBrowPaths() {
+            path.lineWidth = 2.25
+            path.lineCapStyle = .round
+            path.stroke()
+        }
+    }
+
+    private static func drawTiredPupils() {
+        strokeColor().setFill()
+
+        let pupils = [
+            NSRect(x: leftEye.midX + 2.0, y: leftEye.midY - 2.2, width: 2.2, height: 2.2),
+            NSRect(x: rightEye.midX - 4.2, y: rightEye.midY - 2.2, width: 2.2, height: 2.2),
+        ]
+
+        for pupil in pupils {
+            NSBezierPath(ovalIn: pupil).fill()
+        }
+    }
+
+    private static func drawTiredLidLines() {
+        strokeColor().withAlphaComponent(0.92).setStroke()
+
+        for (index, eye) in [leftEye, rightEye].enumerated() {
+            let path = tiredLidPath(for: eye, index: index)
+            path.lineWidth = 1.65
+            path.lineCapStyle = .round
+            path.stroke()
+        }
+    }
+
+    private static func drawTiredLidFills() {
+        lidColor().setFill()
+
+        for (index, eye) in [leftEye, rightEye].enumerated() {
+            NSGraphicsContext.saveGraphicsState()
+            tiredEyePath(for: eye, index: index).addClip()
+            tiredLidFillPath(for: eye, index: index).fill()
+            NSGraphicsContext.restoreGraphicsState()
+        }
+    }
+
+    private static func tiredEyePath(for eye: NSRect, index: Int) -> NSBezierPath {
+        let path = NSBezierPath()
+
+        if index == 0 {
+            path.move(to: NSPoint(x: eye.minX - 1.4, y: eye.midY - 1.0))
+            path.curve(
+                to: NSPoint(x: eye.maxX + 1.3, y: eye.midY + 1.0),
+                controlPoint1: NSPoint(x: eye.minX + 1.8, y: eye.maxY + 1.6),
+                controlPoint2: NSPoint(x: eye.midX + 7.0, y: eye.maxY + 1.2)
+            )
+            path.curve(
+                to: NSPoint(x: eye.minX - 1.4, y: eye.midY - 1.0),
+                controlPoint1: NSPoint(x: eye.maxX - 2.3, y: eye.minY - 0.7),
+                controlPoint2: NSPoint(x: eye.minX + 3.0, y: eye.minY - 0.2)
+            )
+        } else {
+            path.move(to: NSPoint(x: eye.minX - 1.3, y: eye.midY + 1.0))
+            path.curve(
+                to: NSPoint(x: eye.maxX + 1.4, y: eye.midY - 1.0),
+                controlPoint1: NSPoint(x: eye.midX - 7.0, y: eye.maxY + 1.2),
+                controlPoint2: NSPoint(x: eye.maxX - 1.8, y: eye.maxY + 1.6)
+            )
+            path.curve(
+                to: NSPoint(x: eye.minX - 1.3, y: eye.midY + 1.0),
+                controlPoint1: NSPoint(x: eye.maxX - 3.0, y: eye.minY - 0.2),
+                controlPoint2: NSPoint(x: eye.minX + 2.3, y: eye.minY - 0.7)
+            )
+        }
+
+        path.close()
+        return path
+    }
+
+    private static func tiredLidPath(for eye: NSRect, index: Int) -> NSBezierPath {
+        let path = NSBezierPath()
+
+        if index == 0 {
+            path.move(to: NSPoint(x: eye.minX - 1.7, y: eye.midY - 1.0))
+            path.curve(
+                to: NSPoint(x: eye.maxX + 1.5, y: eye.midY + 1.6),
+                controlPoint1: NSPoint(x: eye.minX + 5.5, y: eye.midY + 0.8),
+                controlPoint2: NSPoint(x: eye.midX + 5.6, y: eye.midY + 1.7)
+            )
+        } else {
+            path.move(to: NSPoint(x: eye.minX - 1.5, y: eye.midY + 1.6))
+            path.curve(
+                to: NSPoint(x: eye.maxX + 1.7, y: eye.midY - 1.0),
+                controlPoint1: NSPoint(x: eye.midX - 5.6, y: eye.midY + 1.7),
+                controlPoint2: NSPoint(x: eye.maxX - 5.5, y: eye.midY + 0.8)
+            )
+        }
+
+        return path
+    }
+
+    private static func tiredLidFillPath(for eye: NSRect, index: Int) -> NSBezierPath {
+        let path = tiredLidPath(for: eye, index: index)
+        path.line(to: NSPoint(x: eye.maxX + 2.0, y: eye.maxY + 4.0))
+        path.line(to: NSPoint(x: eye.minX - 2.0, y: eye.maxY + 4.0))
+        path.close()
+        return path
+    }
+
+    private static func tiredBagPath(for eye: NSRect, index: Int) -> NSBezierPath {
+        let path = NSBezierPath()
+
+        if index == 0 {
+            path.move(to: NSPoint(x: eye.minX + 2.8, y: eye.minY + 2.1))
+            path.curve(
+                to: NSPoint(x: eye.maxX - 1.4, y: eye.minY + 3.2),
+                controlPoint1: NSPoint(x: eye.midX - 2.8, y: eye.minY - 0.1),
+                controlPoint2: NSPoint(x: eye.midX + 4.0, y: eye.minY + 0.2)
+            )
+        } else {
+            path.move(to: NSPoint(x: eye.minX + 1.4, y: eye.minY + 3.2))
+            path.curve(
+                to: NSPoint(x: eye.maxX - 2.8, y: eye.minY + 2.1),
+                controlPoint1: NSPoint(x: eye.midX - 4.0, y: eye.minY + 0.2),
+                controlPoint2: NSPoint(x: eye.midX + 2.8, y: eye.minY - 0.1)
+            )
+        }
+
+        return path
+    }
+
+    private static func tiredBrowPaths() -> [NSBezierPath] {
+        let left = NSBezierPath()
+        left.move(to: NSPoint(x: leftEye.minX - 0.5, y: leftEye.maxY - 1.0))
+        left.curve(
+            to: NSPoint(x: leftEye.maxX + 0.7, y: leftEye.maxY - 5.7),
+            controlPoint1: NSPoint(x: leftEye.minX + 5.5, y: leftEye.maxY + 5.0),
+            controlPoint2: NSPoint(x: leftEye.midX + 6.2, y: leftEye.maxY + 3.0)
+        )
+
+        let right = NSBezierPath()
+        right.move(to: NSPoint(x: rightEye.minX - 0.7, y: rightEye.maxY - 5.7))
+        right.curve(
+            to: NSPoint(x: rightEye.maxX + 0.5, y: rightEye.maxY - 1.0),
+            controlPoint1: NSPoint(x: rightEye.midX - 6.2, y: rightEye.maxY + 3.0),
+            controlPoint2: NSPoint(x: rightEye.maxX - 5.5, y: rightEye.maxY + 5.0)
+        )
+
+        return [left, right]
     }
 
     private static func drawSleepingZs(phase: Int) {
