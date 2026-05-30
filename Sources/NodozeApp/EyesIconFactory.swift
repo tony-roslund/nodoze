@@ -186,8 +186,8 @@ enum EyesIconFactory {
     private static func drawMonochromeTiredEyeShapes() {
         templateColor(alpha: 0.95).setStroke()
 
-        for (index, eye) in [leftEye, rightEye].enumerated() {
-            let path = tiredEyePath(for: eye, index: index)
+        for eye in [leftEye, rightEye] {
+            let path = NSBezierPath(ovalIn: eye)
             path.lineWidth = 1.45
             path.stroke()
         }
@@ -207,8 +207,8 @@ enum EyesIconFactory {
         templateColor(alpha: 1.0).setFill()
 
         let pupils = [
-            NSRect(x: leftEye.midX + 2.2, y: leftEye.midY - 2.0, width: 2.0, height: 2.0),
-            NSRect(x: rightEye.midX - 4.2, y: rightEye.midY - 2.0, width: 2.0, height: 2.0),
+            NSRect(x: 21.35, y: 9.45, width: 2.3, height: 2.3),
+            NSRect(x: 32.35, y: 9.45, width: 2.3, height: 2.3),
         ]
 
         for pupil in pupils {
@@ -489,8 +489,8 @@ enum EyesIconFactory {
         strokeColor().setFill()
 
         let pupils = [
-            NSRect(x: leftEye.midX + 2.0, y: leftEye.midY - 2.2, width: 2.2, height: 2.2),
-            NSRect(x: rightEye.midX - 4.2, y: rightEye.midY - 2.2, width: 2.2, height: 2.2),
+            NSRect(x: 21.35, y: 9.45, width: 2.3, height: 2.3),
+            NSRect(x: 32.35, y: 9.45, width: 2.3, height: 2.3),
         ]
 
         for pupil in pupils {
@@ -514,61 +514,32 @@ enum EyesIconFactory {
 
         for (index, eye) in [leftEye, rightEye].enumerated() {
             NSGraphicsContext.saveGraphicsState()
-            tiredEyePath(for: eye, index: index).addClip()
+            NSBezierPath(ovalIn: eye).addClip()
             tiredLidFillPath(for: eye, index: index).fill()
             NSGraphicsContext.restoreGraphicsState()
         }
     }
 
     private static func tiredEyePath(for eye: NSRect, index: Int) -> NSBezierPath {
-        let path = NSBezierPath()
-
-        if index == 0 {
-            path.move(to: NSPoint(x: eye.minX - 1.4, y: eye.midY - 1.0))
-            path.curve(
-                to: NSPoint(x: eye.maxX + 1.3, y: eye.midY + 1.0),
-                controlPoint1: NSPoint(x: eye.minX + 1.8, y: eye.maxY + 1.6),
-                controlPoint2: NSPoint(x: eye.midX + 7.0, y: eye.maxY + 1.2)
-            )
-            path.curve(
-                to: NSPoint(x: eye.minX - 1.4, y: eye.midY - 1.0),
-                controlPoint1: NSPoint(x: eye.maxX - 2.3, y: eye.minY - 0.7),
-                controlPoint2: NSPoint(x: eye.minX + 3.0, y: eye.minY - 0.2)
-            )
-        } else {
-            path.move(to: NSPoint(x: eye.minX - 1.3, y: eye.midY + 1.0))
-            path.curve(
-                to: NSPoint(x: eye.maxX + 1.4, y: eye.midY - 1.0),
-                controlPoint1: NSPoint(x: eye.midX - 7.0, y: eye.maxY + 1.2),
-                controlPoint2: NSPoint(x: eye.maxX - 1.8, y: eye.maxY + 1.6)
-            )
-            path.curve(
-                to: NSPoint(x: eye.minX - 1.3, y: eye.midY + 1.0),
-                controlPoint1: NSPoint(x: eye.maxX - 3.0, y: eye.minY - 0.2),
-                controlPoint2: NSPoint(x: eye.minX + 2.3, y: eye.minY - 0.7)
-            )
-        }
-
-        path.close()
-        return path
+        NSBezierPath(ovalIn: eye)
     }
 
     private static func tiredLidPath(for eye: NSRect, index: Int) -> NSBezierPath {
         let path = NSBezierPath()
 
         if index == 0 {
-            path.move(to: NSPoint(x: eye.minX - 1.7, y: eye.midY - 1.0))
+            path.move(to: NSPoint(x: 6.0, y: 12.0))
             path.curve(
-                to: NSPoint(x: eye.maxX + 1.5, y: eye.midY + 1.6),
-                controlPoint1: NSPoint(x: eye.minX + 5.5, y: eye.midY + 0.8),
-                controlPoint2: NSPoint(x: eye.midX + 5.6, y: eye.midY + 1.7)
+                to: NSPoint(x: 31.0, y: 17.0),
+                controlPoint1: NSPoint(x: 15.0, y: 15.2),
+                controlPoint2: NSPoint(x: 24.0, y: 16.5)
             )
         } else {
-            path.move(to: NSPoint(x: eye.minX - 1.5, y: eye.midY + 1.6))
+            path.move(to: NSPoint(x: 25.0, y: 17.0))
             path.curve(
-                to: NSPoint(x: eye.maxX + 1.7, y: eye.midY - 1.0),
-                controlPoint1: NSPoint(x: eye.midX - 5.6, y: eye.midY + 1.7),
-                controlPoint2: NSPoint(x: eye.maxX - 5.5, y: eye.midY + 0.8)
+                to: NSPoint(x: 50.0, y: 12.0),
+                controlPoint1: NSPoint(x: 32.0, y: 16.5),
+                controlPoint2: NSPoint(x: 41.0, y: 15.2)
             )
         }
 
@@ -587,18 +558,18 @@ enum EyesIconFactory {
         let path = NSBezierPath()
 
         if index == 0 {
-            path.move(to: NSPoint(x: eye.minX + 2.8, y: eye.minY + 2.1))
+            path.move(to: NSPoint(x: 12.0, y: 5.0))
             path.curve(
-                to: NSPoint(x: eye.maxX - 1.4, y: eye.minY + 3.2),
-                controlPoint1: NSPoint(x: eye.midX - 2.8, y: eye.minY - 0.1),
-                controlPoint2: NSPoint(x: eye.midX + 4.0, y: eye.minY + 0.2)
+                to: NSPoint(x: 31.0, y: 7.0),
+                controlPoint1: NSPoint(x: 19.0, y: -1.0),
+                controlPoint2: NSPoint(x: 26.0, y: -0.2)
             )
         } else {
-            path.move(to: NSPoint(x: eye.minX + 1.4, y: eye.minY + 3.2))
+            path.move(to: NSPoint(x: 33.0, y: 7.0))
             path.curve(
-                to: NSPoint(x: eye.maxX - 2.8, y: eye.minY + 2.1),
-                controlPoint1: NSPoint(x: eye.midX - 4.0, y: eye.minY + 0.2),
-                controlPoint2: NSPoint(x: eye.midX + 2.8, y: eye.minY - 0.1)
+                to: NSPoint(x: 52.0, y: 5.0),
+                controlPoint1: NSPoint(x: 38.0, y: -0.2),
+                controlPoint2: NSPoint(x: 45.0, y: -1.0)
             )
         }
 
@@ -607,19 +578,19 @@ enum EyesIconFactory {
 
     private static func tiredBrowPaths() -> [NSBezierPath] {
         let left = NSBezierPath()
-        left.move(to: NSPoint(x: leftEye.minX - 0.5, y: leftEye.maxY - 1.0))
+        left.move(to: NSPoint(x: 7.0, y: 20.0))
         left.curve(
-            to: NSPoint(x: leftEye.maxX + 0.7, y: leftEye.maxY - 5.7),
-            controlPoint1: NSPoint(x: leftEye.minX + 5.5, y: leftEye.maxY + 5.0),
-            controlPoint2: NSPoint(x: leftEye.midX + 6.2, y: leftEye.maxY + 3.0)
+            to: NSPoint(x: 29.0, y: 17.0),
+            controlPoint1: NSPoint(x: 13.0, y: 28.0),
+            controlPoint2: NSPoint(x: 21.0, y: 27.0)
         )
 
         let right = NSBezierPath()
-        right.move(to: NSPoint(x: rightEye.minX - 0.7, y: rightEye.maxY - 5.7))
+        right.move(to: NSPoint(x: 27.0, y: 17.0))
         right.curve(
-            to: NSPoint(x: rightEye.maxX + 0.5, y: rightEye.maxY - 1.0),
-            controlPoint1: NSPoint(x: rightEye.midX - 6.2, y: rightEye.maxY + 3.0),
-            controlPoint2: NSPoint(x: rightEye.maxX - 5.5, y: rightEye.maxY + 5.0)
+            to: NSPoint(x: 49.0, y: 20.0),
+            controlPoint1: NSPoint(x: 35.0, y: 27.0),
+            controlPoint2: NSPoint(x: 43.0, y: 28.0)
         )
 
         return [left, right]

@@ -33,9 +33,9 @@ const sizes = {
 };
 
 const eyeCenters = [44, 100];
-const eyeY = 48;
-const eyeRx = 28;
-const eyeRy = 36;
+const eyeY = 50;
+const eyeRx = 27;
+const eyeRy = 37;
 
 function upperLidPath(cx: number, openness: number) {
   const closedness = 1 - openness;
@@ -78,8 +78,8 @@ function creasePath(cx: number, openness: number, eyeIndex: number) {
 function browPath(cx: number, eyeIndex: number, enabled: boolean) {
   if (!enabled) {
     return eyeIndex === 0
-      ? `M ${cx - 28} 25 C ${cx - 14} 8, ${cx + 5} 8, ${cx + 25} 31`
-      : `M ${cx - 25} 31 C ${cx - 5} 8, ${cx + 14} 8, ${cx + 28} 25`;
+      ? `M ${cx - 31} 31 C ${cx - 16} 10, ${cx + 7} 12, ${cx + 29} 39`
+      : `M ${cx - 29} 39 C ${cx - 7} 12, ${cx + 16} 10, ${cx + 31} 31`;
   }
 
   return eyeIndex === 0
@@ -87,29 +87,23 @@ function browPath(cx: number, eyeIndex: number, enabled: boolean) {
     : `M ${cx - 8} 10 C ${cx + 3} 2, ${cx + 14} 2, ${cx + 24} 12`;
 }
 
-function tiredEyePath(cx: number, eyeIndex: number) {
-  return eyeIndex === 0
-    ? `M ${cx - 33} 53 C ${cx - 28} 30, ${cx - 3} 17, ${cx + 31} 43 C ${cx + 23} 66, ${cx - 15} 71, ${cx - 33} 53 Z`
-    : `M ${cx - 31} 43 C ${cx + 3} 17, ${cx + 28} 30, ${cx + 33} 53 C ${cx + 15} 71, ${cx - 23} 66, ${cx - 31} 43 Z`;
-}
-
 function tiredLidPath(cx: number, eyeIndex: number) {
   return eyeIndex === 0
-    ? `M ${cx - 35} 53 C ${cx - 15} 47, ${cx + 8} 43, ${cx + 32} 42`
-    : `M ${cx - 32} 42 C ${cx - 8} 43, ${cx + 15} 47, ${cx + 35} 53`;
+    ? `M ${cx - 32} 56 C ${cx - 13} 48, ${cx + 10} 44, ${cx + 32} 42`
+    : `M ${cx - 32} 42 C ${cx - 10} 44, ${cx + 13} 48, ${cx + 32} 56`;
 }
 
 function tiredLidFillPath(cx: number, eyeIndex: number) {
   return eyeIndex === 0
-    ? `M ${cx - 35} 53 C ${cx - 15} 47, ${cx + 8} 43, ${cx + 32} 42 L ${cx + 36} -12 L ${cx - 36} -12 Z`
-    : `M ${cx - 32} 42 C ${cx - 8} 43, ${cx + 15} 47, ${cx + 35} 53 L ${cx + 36} -12 L ${cx - 36} -12 Z`;
+    ? `M ${cx - 32} 56 C ${cx - 13} 48, ${cx + 10} 44, ${cx + 32} 42 L ${cx + 32} -10 L ${cx - 32} -10 Z`
+    : `M ${cx - 32} 42 C ${cx - 10} 44, ${cx + 13} 48, ${cx + 32} 56 L ${cx + 32} -10 L ${cx - 32} -10 Z`;
 }
 
 function tiredLinePaths(cx: number, eyeIndex: number) {
   return [
     eyeIndex === 0
-      ? `M ${cx - 22} 69 C ${cx - 9} 75, ${cx + 9} 75, ${cx + 24} 66`
-      : `M ${cx - 24} 66 C ${cx - 9} 75, ${cx + 9} 75, ${cx + 22} 69`,
+      ? `M ${cx - 20} 77 C ${cx - 6} 83, ${cx + 11} 82, ${cx + 24} 73`
+      : `M ${cx - 24} 73 C ${cx - 11} 82, ${cx + 6} 83, ${cx + 20} 77`,
   ];
 }
 
@@ -191,20 +185,20 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
           </span>
         </>
       ) : null}
-      <svg viewBox="0 0 144 96" className="relative z-10 size-full overflow-visible" fill="none">
+      <svg viewBox="0 0 144 104" className="relative z-10 size-full overflow-visible" fill="none">
         <defs>
           {eyeCenters.map((cx) => (
             <clipPath key={cx} id={`${clipId}-${cx}`}>
-              {enabled ? <ellipse cx={cx} cy={eyeY} rx={eyeRx} ry={eyeRy} /> : <path d={tiredEyePath(cx, eyeCenters.indexOf(cx))} />}
+              <ellipse cx={cx} cy={eyeY} rx={eyeRx} ry={eyeRy} />
             </clipPath>
           ))}
         </defs>
 
         {eyeCenters.map((cx, index) => {
           const crossX = offset.crossed ? (index === 0 ? config.maxX * 0.8 : -config.maxX * 0.8) : offset.x;
-          const pupilX = cx + (enabled ? crossX : index === 0 ? 8 : -8);
-          const pupilY = eyeY + (enabled ? offset.y : 1);
-          const pupilRadius = enabled ? config.pupil : config.pupil * 0.44;
+          const pupilX = cx + (enabled ? crossX : index === 0 ? 13 : -13);
+          const pupilY = eyeY + (enabled ? offset.y : 8);
+          const pupilRadius = enabled ? config.pupil : 3.8;
 
           return (
             <g key={cx}>
@@ -226,7 +220,16 @@ export function GooglyEyes({ enabled = true, size = "md" }: { enabled?: boolean;
                   strokeWidth={config.stroke}
                 />
               ) : (
-                <path d={tiredEyePath(cx, index)} fill={eyeColor} stroke="#18181b" strokeOpacity="0.88" strokeWidth={config.stroke} />
+                <ellipse
+                  cx={cx}
+                  cy={eyeY}
+                  rx={eyeRx}
+                  ry={eyeRy}
+                  fill={eyeColor}
+                  stroke="#18181b"
+                  strokeOpacity="0.88"
+                  strokeWidth={config.stroke}
+                />
               )}
               <g clipPath={`url(#${clipId}-${cx})`}>
                 <circle cx={pupilX} cy={pupilY} r={pupilRadius} fill="#111113" />
