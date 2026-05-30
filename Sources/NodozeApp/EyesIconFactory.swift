@@ -85,6 +85,7 @@ enum EyesIconFactory {
             drawMonochromeUpperLid(for: eye, openness: 0.16)
         }
 
+        drawMonochromeEyeBags()
         drawMonochromeSleepingZs(phase: sleepingPhase)
     }
 
@@ -144,18 +145,18 @@ enum EyesIconFactory {
                 controlPoint2: NSPoint(x: rightEye.maxX - 4.2, y: rightEye.maxY + 3.6)
             )
         } else {
-            left.move(to: NSPoint(x: leftEye.minX + 0.7, y: leftEye.maxY - 0.6))
+            left.move(to: NSPoint(x: leftEye.minX + 0.3, y: leftEye.maxY - 3.1))
             left.curve(
-                to: NSPoint(x: leftEye.maxX - 2.0, y: leftEye.maxY - 3.0),
-                controlPoint1: NSPoint(x: leftEye.minX + 4.0, y: leftEye.maxY + 0.8),
-                controlPoint2: NSPoint(x: leftEye.midX + 1.0, y: leftEye.maxY + 0.3)
+                to: NSPoint(x: leftEye.maxX - 1.5, y: leftEye.maxY - 0.8),
+                controlPoint1: NSPoint(x: leftEye.minX + 4.2, y: leftEye.maxY - 1.7),
+                controlPoint2: NSPoint(x: leftEye.midX + 1.0, y: leftEye.maxY + 0.1)
             )
 
-            right.move(to: NSPoint(x: rightEye.minX + 2.0, y: rightEye.maxY - 3.0))
+            right.move(to: NSPoint(x: rightEye.minX + 1.5, y: rightEye.maxY - 0.8))
             right.curve(
-                to: NSPoint(x: rightEye.maxX - 0.7, y: rightEye.maxY - 0.6),
-                controlPoint1: NSPoint(x: rightEye.midX - 1.0, y: rightEye.maxY + 0.3),
-                controlPoint2: NSPoint(x: rightEye.maxX - 4.0, y: rightEye.maxY + 0.8)
+                to: NSPoint(x: rightEye.maxX - 0.3, y: rightEye.maxY - 3.1),
+                controlPoint1: NSPoint(x: rightEye.midX - 1.0, y: rightEye.maxY + 0.1),
+                controlPoint2: NSPoint(x: rightEye.maxX - 4.2, y: rightEye.maxY - 1.7)
             )
         }
 
@@ -163,6 +164,27 @@ enum EyesIconFactory {
             brow.lineWidth = 1.7
             brow.lineCapStyle = .round
             brow.stroke()
+        }
+    }
+
+    private static func drawMonochromeEyeBags() {
+        templateColor(alpha: 0.55).setStroke()
+
+        let paths: [NSBezierPath] = [leftEye, rightEye].map { eye in
+            let path = NSBezierPath()
+            path.move(to: NSPoint(x: eye.minX + 4.0, y: eye.minY + 1.7))
+            path.curve(
+                to: NSPoint(x: eye.maxX - 4.0, y: eye.minY + 1.8),
+                controlPoint1: NSPoint(x: eye.midX - 3.8, y: eye.minY - 0.4),
+                controlPoint2: NSPoint(x: eye.midX + 3.8, y: eye.minY - 0.4)
+            )
+            return path
+        }
+
+        for path in paths {
+            path.lineWidth = 0.95
+            path.lineCapStyle = .round
+            path.stroke()
         }
     }
 
@@ -360,18 +382,18 @@ enum EyesIconFactory {
                 controlPoint2: NSPoint(x: rightEye.maxX - 4.0, y: rightEye.maxY + 4.2)
             )
         } else {
-            left.move(to: NSPoint(x: leftEye.minX + 0.6, y: leftEye.maxY - 0.4))
+            left.move(to: NSPoint(x: leftEye.minX + 0.3, y: leftEye.maxY - 3.1))
             left.curve(
-                to: NSPoint(x: leftEye.maxX - 1.4, y: leftEye.maxY - 3.0),
-                controlPoint1: NSPoint(x: leftEye.minX + 4.0, y: leftEye.maxY + 1.2),
-                controlPoint2: NSPoint(x: leftEye.midX + 1.0, y: leftEye.maxY + 0.5)
+                to: NSPoint(x: leftEye.maxX - 1.5, y: leftEye.maxY - 0.8),
+                controlPoint1: NSPoint(x: leftEye.minX + 4.2, y: leftEye.maxY - 1.7),
+                controlPoint2: NSPoint(x: leftEye.midX + 1.0, y: leftEye.maxY + 0.1)
             )
 
-            right.move(to: NSPoint(x: rightEye.minX + 1.4, y: rightEye.maxY - 3.0))
+            right.move(to: NSPoint(x: rightEye.minX + 1.5, y: rightEye.maxY - 0.8))
             right.curve(
-                to: NSPoint(x: rightEye.maxX - 0.6, y: rightEye.maxY - 0.4),
-                controlPoint1: NSPoint(x: rightEye.midX - 1.0, y: rightEye.maxY + 0.5),
-                controlPoint2: NSPoint(x: rightEye.maxX - 4.0, y: rightEye.maxY + 1.2)
+                to: NSPoint(x: rightEye.maxX - 0.3, y: rightEye.maxY - 3.1),
+                controlPoint1: NSPoint(x: rightEye.midX - 1.0, y: rightEye.maxY + 0.1),
+                controlPoint2: NSPoint(x: rightEye.maxX - 4.2, y: rightEye.maxY - 1.7)
             )
         }
 
@@ -401,6 +423,21 @@ enum EyesIconFactory {
 
         for eye in [leftEye, rightEye] {
             drawLowerLidEdge(for: eye, alpha: 0.22)
+        }
+
+        strokeColor().withAlphaComponent(0.36).setStroke()
+
+        for eye in [leftEye, rightEye] {
+            let path = NSBezierPath()
+            path.move(to: NSPoint(x: eye.minX + 4.0, y: eye.minY + 1.7))
+            path.curve(
+                to: NSPoint(x: eye.maxX - 4.0, y: eye.minY + 1.8),
+                controlPoint1: NSPoint(x: eye.midX - 3.8, y: eye.minY - 0.4),
+                controlPoint2: NSPoint(x: eye.midX + 3.8, y: eye.minY - 0.4)
+            )
+            path.lineWidth = 0.7
+            path.lineCapStyle = .round
+            path.stroke()
         }
     }
 

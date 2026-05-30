@@ -17,7 +17,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var monitorSuperset = true
     @Published private(set) var customAgentProcessNames = ""
     @Published private(set) var agentIdleGraceMinutes = 10
-    @Published private(set) var menuBarIconStyle: MenuBarIconStyle = .fullColor
+    @Published private(set) var menuBarIconStyle: MenuBarIconStyle = .monochrome
     @Published var automaticUpdateChecks: Bool {
         didSet {
             defaults.set(automaticUpdateChecks, forKey: DefaultsKey.automaticUpdateChecks)
