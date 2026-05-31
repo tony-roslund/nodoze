@@ -21,13 +21,20 @@ final class PowerManager {
     private var displayAssertionID: IOPMAssertionID?
 
     func sleepIsDisabled() async -> Bool {
-        !systemAssertionIDs.isEmpty
+        Self.persistentSleepIsDisabled() || !systemAssertionIDs.isEmpty
     }
 
     func setSleepDisabled(_ disabled: Bool, allowDisplaySleep: Bool) async throws {
         if disabled {
-            try acquireAssertions(allowDisplaySleep: allowDisplaySleep)
+            do {
+                try setPersistentSleepDisabled(true)
+                try acquireAssertions(allowDisplaySleep: allowDisplaySleep)
+            } catch {
+                releaseAssertions()
+                throw error
+            }
         } else {
+            try setPersistentSleepDisabled(false)
             releaseAssertions()
         }
     }
@@ -119,5 +126,58 @@ final class PowerManager {
         }
 
         return assertionID
+    }
+
+    private func setPersistentSleepDisabled(_ disabled: Bool) throws {
+        let process = Process()
+        let outputPipe = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
+        process.arguments = [
+            "-n",
+            "/usr/bin/pmset",
+            "-a",
+            "disablesleep",
+            disabled ? "1" : "0",
+        ]
+        process.standardOutput = outputPipe
+        process.standardError = outputPipe
+
+        try process.run()
+        let data = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+
+        guard process.terminationStatus == 0 else {
+            throw PowerManagerError.commandFailed(
+                command: "pmset disablesleep",
+                status: process.terminationStatus,
+                output: String(data: data, encoding: .utf8) ?? ""
+            )
+        }
+    }
+
+    private static func persistentSleepIsDisabled() -> Bool {
+        let process = Process()
+        let outputPipe = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/pmset")
+        process.arguments = ["-g"]
+        process.standardOutput = outputPipe
+        process.standardError = Pipe()
+
+        do {
+            try process.run()
+        } catch {
+            return false
+        }
+
+        let data = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        guard let output = String(data: data, encoding: .utf8) else { return false }
+
+        return output
+            .split(separator: "\n")
+            .contains { line in
+                let parts = line.split(separator: " ", omittingEmptySubsequences: true)
+                return parts.first == "SleepDisabled" && parts.dropFirst().first == "1"
+            }
     }
 }

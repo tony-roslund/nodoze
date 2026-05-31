@@ -27,6 +27,7 @@ INFO_PLIST="$APP_CONTENTS/Info.plist"
 APP_ICON="$ROOT_DIR/Resources/AppIcon.icns"
 ZIP_PATH="$RELEASE_DIR/$DISPLAY_NAME-$VERSION.zip"
 PKG_ROOT="$RELEASE_DIR/pkg-root"
+PKG_SCRIPTS="$RELEASE_DIR/pkg-scripts"
 COMPONENT_PLIST="$RELEASE_DIR/component.plist"
 COMPONENT_PKG="$RELEASE_DIR/$DISPLAY_NAME-component.pkg"
 PKG_PATH="$RELEASE_DIR/$DISPLAY_NAME-$VERSION.pkg"
@@ -82,16 +83,42 @@ PLIST
 /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP_BUNDLE"
 /usr/bin/ditto -c -k --norsrc --noextattr --keepParent "$APP_BUNDLE" "$ZIP_PATH"
 
-mkdir -p "$PKG_ROOT/Applications"
+mkdir -p "$PKG_ROOT/Applications" "$PKG_SCRIPTS"
 /usr/bin/ditto --norsrc --noextattr "$APP_BUNDLE" "$PKG_ROOT/Applications/$DISPLAY_NAME.app"
 /usr/bin/xattr -cr "$PKG_ROOT"
 find "$PKG_ROOT" -name '._*' -delete
+
+cat >"$PKG_SCRIPTS/postinstall" <<'SCRIPT'
+#!/bin/sh
+set -eu
+
+SUDOERS_FILE="/etc/sudoers.d/nodoze"
+TEMP_FILE="${SUDOERS_FILE}.tmp"
+
+cat >"$TEMP_FILE" <<'SUDOERS'
+%admin ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1
+SUDOERS
+
+chown root:wheel "$TEMP_FILE"
+chmod 0440 "$TEMP_FILE"
+
+if /usr/sbin/visudo -cf "$TEMP_FILE" >/dev/null; then
+  mv "$TEMP_FILE" "$SUDOERS_FILE"
+else
+  rm -f "$TEMP_FILE"
+  exit 1
+fi
+
+exit 0
+SCRIPT
+chmod 0755 "$PKG_SCRIPTS/postinstall"
 
 pkgbuild --analyze --root "$PKG_ROOT" "$COMPONENT_PLIST"
 /usr/libexec/PlistBuddy -c "Set :0:BundleIsRelocatable false" "$COMPONENT_PLIST"
 
 pkgbuild \
   --root "$PKG_ROOT" \
+  --scripts "$PKG_SCRIPTS" \
   --component-plist "$COMPONENT_PLIST" \
   --filter '.*[.][_].*' \
   --filter '(^|/)\.DS_Store$' \
