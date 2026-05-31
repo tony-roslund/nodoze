@@ -4,7 +4,29 @@ nodoze is a tiny macOS menu bar app for keeping a MacBook awake while the lid is
 
 Free and open source under the MIT License.
 
-The app toggles a macOS power assertion while it is running. It does not require a privileged helper or a password prompt to turn nodoze on and off.
+On Apple Silicon Macs, normal `caffeinate`-style power assertions do not reliably keep a MacBook awake after the lid is closed. nodoze uses `pmset disablesleep` for the lid-closed behavior, then keeps regular macOS power assertions as a visible supplemental signal while the app is active.
+
+When installed with the signed `.pkg`, nodoze adds a tightly scoped sudoers rule that allows admin users to run only these two commands without a repeated password prompt:
+
+```sh
+/usr/bin/pmset -a disablesleep 1
+/usr/bin/pmset -a disablesleep 0
+```
+
+That means the installer asks for normal macOS admin approval once, and the menu bar toggle can turn lid-close sleep prevention on and off after that. The direct `.zip` app build is useful for inspection or manual installation, but the `.pkg` is the supported install path for the passwordless toggle setup.
+
+To verify the real lid-closed mechanism:
+
+```sh
+pmset -g | grep SleepDisabled
+```
+
+Expected states:
+
+- nodoze on: `SleepDisabled 1`
+- nodoze off: `SleepDisabled 0`
+
+Other tools, including agent CLIs, may also create their own `caffeinate` or IOKit assertions. Those can show up in `pmset -g assertions`, but nodoze's core state is the `SleepDisabled` value above.
 
 ## App
 
